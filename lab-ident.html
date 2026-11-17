@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>역명판 실험</title>
+<link rel="stylesheet" href="css/nycta.css">
+<script>(function(){var q=location.search,local=location.protocol==='file:'||/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);if(/[?&]font=helvetica\b/.test(q)||(local&&!/[?&]font=albert\b/.test(q)))document.write('<link rel="stylesheet" href="preview/helvetica.css">');})();</script>
+<style>
+  /* lab scaffolding — not part of the system */
+  body { padding: 24px; }
+  .ui, .ui * { font-family: system-ui, sans-serif; letter-spacing: 0; word-spacing: normal; font-weight: 400; }
+  .ui { font-size: 14px; line-height: 1.45; max-width: 70ch; }
+  .ui h1 { font-size: 20px; font-weight: 600; margin: 0 0 8px; }
+  .ui h2 { font-size: 16px; font-weight: 600; margin: 0 0 4px; }
+  .ui p { margin: 0 0 8px; font-size: 14px; }
+  .controls { display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: center; margin: 12px 0 24px; max-width: none; }
+  .controls { position: sticky; top: 0; z-index: 10; background: var(--bg); padding: 10px 0; margin-top: 0; border-bottom: 1px solid #bbb; }
+  .controls label { display: flex; gap: 8px; align-items: center; white-space: nowrap; }
+  .controls :is(input, select) { all: revert; }
+  .note { color: var(--c-grey); font-size: 12px; }
+  section { margin: 0 0 40px; }
+  .frame { container-type: inline-size; width: var(--frame, 100%); max-width: 100%; background: #d9d6d2; padding: 16px 0 16px 16px; display: grid; gap: 16px; justify-items: start; }
+  @media (prefers-color-scheme: dark) { .frame { background: #2a2a2a; } }
+  .grid .m { outline: 1px dashed rgba(0,160,255,.9); outline-offset: -1px; }
+  .grid .ft { background-image: repeating-linear-gradient(90deg, transparent 0 calc(var(--module) - 1px), rgba(0,160,255,.5) calc(var(--module) - 1px) var(--module)); }
+  .tag { font: 11px/1.2 system-ui, sans-serif; letter-spacing: 0; word-spacing: normal; color: #555; margin: 0 0 4px; }
+  @media (prefers-color-scheme: dark) { .tag { color: #aaa; } }
+
+  /* module-derived tokens are resolved on :root, so a scope that changes --module must restate them */
+  .scope {
+    --in: calc(var(--module) / 12);
+    --cap-l: calc(var(--in) * 9);
+    --fs-l: calc(var(--cap-l) / var(--cap-em));
+    --space-margin: calc(var(--in) * 0.5);
+    --stroke-band: calc(var(--in) * 1.625);
+  }
+  /* all three versions size from the frame, not the viewport, so the slider drives them */
+  .frame .plate { --module: clamp(40px, 10cqi, 97.75px); }
+
+  /* A — fixed 4:1, scaled as one picture; the name shrinks to fit when it is longer than 4 ft */
+  .frame .plate.a { --module: calc((100cqi - 16px) / 4); }
+  .a .m { width: calc(var(--module) * 4); height: var(--module); overflow: hidden; }
+  .a .t-ident { font-size: calc(var(--fs-l) * var(--fit, 1)); }
+
+  /* B — hug width, field cropped from the bottom */
+  .b .m { width: max-content; min-width: var(--module); padding-right: var(--space-margin);
+          height: calc(var(--in) * var(--field-in, 12)); min-height: 0; overflow: hidden; }
+  .b.snapped .m { width: var(--snap-w); }
+  .plate.b { overflow-x: auto; }
+</style>
+</head>
+<body>
+<div class="ui">
+  <h1>역명판 실험: 지금 / A 4:1 비례 / B 허그</h1>
+  <p>회색 틀 = 이 판이 들어갈 자리(컨테이너). 슬라이더로 폭을 바꿔 보세요. 세 방식 모두 화면 폭(vw)이 아니라 틀 폭(cqi)으로 크기를 잡습니다.</p>
+</div>
+<div class="ui controls">
+  <label>틀 폭 <input id="frame" type="range" min="280" max="1100" value="900"> <output id="frameOut">900px</output></label>
+  <label><input id="grid" type="checkbox"> 모듈 격자</label>
+  <label>B 세로 <input id="field" type="range" min="10" max="12" step="0.25" value="12"> <output id="fieldOut">12″</output></label>
+  <label>B 가로 끝 <select id="snap"><option value="0">허그(½″ 여백)</option><option value="0.5" selected>½ ft 올림 (+½ ft if &lt; 1″) · DEC-030</option><option value="1">1 ft 단위로 올림</option></select></label>
+  <label>B 좁을 때 <select id="narrow"><option value="scroll">가로 스크롤</option><option value="fit">틀에 맞게 축소</option></select></label>
+</div>
+
+<section>
+  <div class="ui"><h2>예전 기록: 4/6/8 ft (이제 nycta.css는 DEC-030, JS 없이 허그만 보임)</h2><p class="note">DEC-022: 너비 = max(글자, 4/6/8 ft). Union Square는 8 ft의 약 ¼이 빔. 모듈 기준 아님(6.24 ft 같은 값).</p></div>
+  <div class="frame" data-v="now"></div>
+</section>
+<section>
+  <div class="ui"><h2>A. 4×1 고정 비율, 통째로 확대·축소</h2><p class="note">판 = 4:1, 틀 폭을 꽉 채움(모듈 = 틀 ÷ 4, 상한 없음). 4 ft에 안 들어가는 이름은 글자가 작아짐 → 역명끼리 글자 크기가 달라짐.</p></div>
+  <div class="frame" data-v="a"></div>
+</section>
+<section>
+  <div class="ui"><h2>B. 가로 허그 + 세로 아래 잘림</h2><p class="note">글자 크기 9″ 고정. 판 너비 = ½″ + 이름 + ½″. 세로는 띠·위 여백·글자를 지키고 아래를 자를 수 있음(슬라이더).</p></div>
+  <div class="frame" data-v="b"></div>
+</section>
+
+<script>
+const NAMES = [["Avenue M", 4], ["34 Street", 4], ["Times Square", 6], ["Union Square", 8], ["Broadway Nassau", 8], ["Pelham Bay Park", 8]];
+const $ = s => document.querySelector(s);
+
+function build() {
+  for (const f of document.querySelectorAll('.frame')) {
+    const v = f.dataset.v;
+    f.innerHTML = NAMES.map(([n, ft]) => {
+      const cls = v === 'now' ? `plate sign-ident scope` : `plate sign-ident scope ${v}`;
+      const m = v === 'now' ? `m m-${ft}` : 'm';
+      return `<figure style="margin:0;max-width:100%"><p class="tag" data-tag></p><div class="${cls}" data-ft="${ft}"><div class="${m}"><p class="t-ident trim">${n}</p></div></div></figure>`;
+    }).join('');
+  }
+}
+
+function px(el, prop) { return parseFloat(getComputedStyle(el).getPropertyValue(prop)); }
+function inkWidth(p) { const r = document.createRange(); r.selectNodeContents(p); return r.getBoundingClientRect().width; }
+function moduleOf(plate) { const d = document.createElement('div'); d.style.width = 'var(--module)'; plate.append(d); const w = d.getBoundingClientRect().width; d.remove(); return w; }
+
+function layout() {
+  const snap = +$('#snap').value, narrow = $('#narrow').value;
+  document.documentElement.style.setProperty('--field-in', $('#field').value);
+  for (const plate of document.querySelectorAll('.plate')) {
+    const p = plate.querySelector('.t-ident'), m = plate.querySelector('.m'), tag = plate.parentElement.querySelector('[data-tag]');
+    plate.style.removeProperty('--fit'); plate.style.removeProperty('--module'); plate.style.removeProperty('--snap-w'); plate.classList.remove('snapped');
+    let M = moduleOf(plate);
+    if (plate.classList.contains('a')) {
+      const avail = 4 * M - M / 12;           // 4 ft − ½″ left − ½″ right
+      const fit = Math.min(1, avail / inkWidth(p));
+      plate.style.setProperty('--fit', fit);
+      tag.textContent = `4:1 · 모듈 ${M.toFixed(0)}px · cap ${(9 * fit).toFixed(2)}″ = ${(M / 12 * 9 * fit).toFixed(0)}px${fit < 1 ? ' (축소)' : ''}`;
+    } else if (plate.classList.contains('b')) {
+      const box = plate.closest('.frame').clientWidth - 16;
+      if (narrow === 'fit') {
+        const need = m.getBoundingClientRect().width;
+        if (need > box) { M = M * box / need; plate.style.setProperty('--module', M + 'px'); }
+      }
+      if (snap) {
+        const w = m.getBoundingClientRect().width, step = snap * M;
+        let sw = Math.ceil(w / step - 1e-6) * step; if (snap === 0.5 && sw - w < M / 12) sw += step; /* DEC-030: < 1in room → +½ ft */
+        plate.style.setProperty('--snap-w', sw + 'px'); plate.classList.add('snapped');
+      }
+      tag.textContent = `너비 ${(m.getBoundingClientRect().width / M).toFixed(2)} ft · 모듈 ${M.toFixed(0)}px · cap ${(M * 0.75).toFixed(0)}px`;
+    } else {
+      tag.textContent = `${plate.dataset.ft} ft 판 → 실제 ${(m.getBoundingClientRect().width / M).toFixed(2)} ft · 채움 ${(inkWidth(p) / m.getBoundingClientRect().width * 100).toFixed(0)}%${plate.scrollWidth > plate.clientWidth + 1 ? ' · 스크롤 생김' : ''}`;
+    }
+    m.classList.add('ft');
+  }
+}
+
+function sync() {
+  $('#frameOut').textContent = $('#frame').value + 'px';
+  $('#fieldOut').textContent = $('#field').value + '″';
+  document.documentElement.style.setProperty('--frame', $('#frame').value + 'px');
+  document.body.classList.toggle('grid', $('#grid').checked);
+  layout();
+}
+build();
+for (const id of ['frame', 'grid', 'field', 'snap', 'narrow']) $('#' + id).addEventListener('input', sync);
+const q = new URLSearchParams(location.search);
+for (const k of ['frame', 'field', 'snap', 'narrow']) if (q.has(k)) $('#' + k).value = q.get(k);
+if (q.has('grid')) $('#grid').checked = true;
+document.fonts.ready.then(sync);
+addEventListener('resize', layout);
+</script>
+</body>
+</html>
