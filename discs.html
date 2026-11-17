@@ -1,0 +1,39 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="utf-8"><link rel="stylesheet" href="css/nycta.css">
+<script>/* ?font=helvetica → local preview font (tools/build_fonts.py helvetica). Never ship. */ if(/[?&]font=helvetica\b/.test(location.search)) document.write('<link rel="stylesheet" href="preview/helvetica.css">');</script>
+<style>
+body{padding:30px;background:#fff}
+.v{margin-bottom:60px}
+/* verification only: print discs black like the 1970 masters (geometry check, not color) */
+.mono .disc{--line:#000 !important;color:#fff !important}
+:root{--module:97.75px}
+</style></head><body>
+<!-- Disc centering check: all 26 routes on 1 ft modules, black like the 1970 masters (pdf p.15–40). Used by tools/verify.py -->
+<div class="v mono" id="discs"><div class="plate" style="flex-wrap:wrap;width:calc(var(--module)*9)">
+ <div class="m m-center"><span class="disc" data-line="1"><span>1</span></span></div>
+ <div class="m m-center"><span class="disc" data-line="2"><span>2</span></span></div>
+ <div class="m m-center"><span class="disc" data-line="3"><span>3</span></span></div>
+ <div class="m m-center"><span class="disc" data-line="4"><span>4</span></span></div>
+ <div class="m m-center"><span class="disc" data-line="5"><span>5</span></span></div>
+ <div class="m m-center"><span class="disc" data-line="6"><span>6</span></span></div>
+ <div class="m m-center"><span class="disc" data-line="7"><span>7</span></span></div>
+ <div class="m m-center"><span class="disc" data-line="8"><span>8</span></span></div>
+ <div class="m m-center"><span class="disc" data-line="A"><span>A</span></span></div>
+ <div class="m m-center"><span class="disc" data-line="AA"><span>AA</span></span></div>
+ <div class="m m-center"><span class="disc" data-line="B"><span>B</span></span></div>
+ <div class="m m-center"><span class="disc" data-line="CC"><span>CC</span></span></div>
+ <div class="m m-center"><span class="disc" data-line="D"><span>D</span></span></div>
+ <div class="m m-center"><span class="disc" data-line="E"><span>E</span></span></div>
+ <div class="m m-center"><span class="disc" data-line="EE"><span>EE</span></span></div>
+ <div class="m m-center"><span class="disc" data-line="F"><span>F</span></span></div>
+ <div class="m m-center"><span class="disc" data-line="GG"><span>GG</span></span></div>
+ <div class="m m-center"><span class="disc" data-line="HH"><span>HH</span></span></div>
+ <div class="m m-center"><span class="disc" data-line="KK"><span>KK</span></span></div>
+ <div class="m m-center"><span class="disc" data-line="LL"><span>LL</span></span></div>
+ <div class="m m-center"><span class="disc" data-line="M"><span>M</span></span></div>
+ <div class="m m-center"><span class="disc" data-line="N"><span>N</span></span></div>
+ <div class="m m-center"><span class="disc" data-line="QB"><span>QB</span></span></div>
+ <div class="m m-center"><span class="disc" data-line="QJ"><span>QJ</span></span></div>
+ <div class="m m-center"><span class="disc" data-line="RR"><span>RR</span></span></div>
+ <div class="m m-center"><span class="disc" data-line="SS"><span>SS</span></span></div>
+</div></div>
+</body></html>

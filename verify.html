@@ -1,0 +1,29 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="utf-8"><link rel="stylesheet" href="css/nycta.css">
+<script>/* ?font=helvetica → local preview font (tools/build_fonts.py helvetica). Never ship. */ if(/[?&]font=helvetica\b/.test(location.search)) document.write('<link rel="stylesheet" href="preview/helvetica.css">');</script>
+<style>
+body{padding:30px;background:#fff}
+.v{margin-bottom:60px}
+/* verification only: print discs black like the 1970 masters (geometry check, not color) */
+.mono .disc{--line:#000 !important;color:#fff !important}
+:root{--module:97.75px}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute"><symbol id="arrow" viewBox="-0.5 -0.5 1 1"><path d="M -0.488 -0.1015 L 0.119 -0.1015 L -0.048 -0.269 L 0.096 -0.403 L 0.5 0 L 0.096 0.403 L -0.048 0.269 L 0.119 0.1015 L -0.488 0.1015 Z"/></symbol></svg>
+<div class="v mono" id="ex3"><div class="plate">
+ <div class="m m-center"><svg class="arrow" data-dir="up-left"><use href="#arrow"/></svg></div>
+ <div class="m m-4"><p class="t-direction trim">Downtown<br>&amp; Brooklyn</p></div>
+ <div class="m m-center"><span class="disc" data-line="1"><span>1</span></span></div>
+ <div class="m m-center"><span class="disc" data-line="2"><span>2</span></span></div>
+ <div class="m m-center"><span class="disc" data-line="3"><span>3</span></span></div>
+</div></div>
+<div class="v mono" id="ex4"><div class="plate">
+ <div class="m m-center"><svg class="arrow" data-dir="up"><use href="#arrow"/></svg></div>
+ <div class="m m-center"><span class="disc" data-line="EE"><span>EE</span></span></div>
+ <div class="m m-center"><span class="disc" data-line="N"><span>N</span></span></div>
+ <div class="m m-center"><span class="disc" data-line="QB"><span>QB</span></span></div>
+ <div class="m m-center"><span class="disc" data-line="RR"><span>RR</span></span></div>
+ <div class="m m-blank"></div>
+ <div class="m m-center"><svg class="arrow" data-dir="right"><use href="#arrow"/></svg></div>
+ <div class="m m-center"><span class="disc" data-line="2"><span>2</span></span></div>
+</div></div>
+<div class="v" id="ex6"><div class="plate"><div class="m m-8"><p class="t-ident trim">Broadway Nassau</p></div></div></div>
+</body></html>

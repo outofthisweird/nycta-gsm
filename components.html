@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NYCTA 1970 → Web · component examples</title>
+<link rel="stylesheet" href="css/nycta.css">
+<script>/* ?font=helvetica → local preview font (tools/build_fonts.py helvetica). Never ship. */ if(/[?&]font=helvetica\b/.test(location.search)) document.write('<link rel="stylesheet" href="preview/helvetica.css">');</script>
+<style>
+  /* page scaffolding only (not part of the system) */
+  main { padding: var(--doc-space-4) var(--doc-space-3); max-width: 1100px; }
+  .demo { margin: 0 0 var(--doc-space-4); }
+  .demo > .cap { font-size: 12px; color: var(--c-grey); margin: 0 0 6px; letter-spacing: 0; }
+  .wall { background: #d9d6d2; padding: 24px; display: grid; grid-template-columns: minmax(0,1fr); gap: 24px; justify-items: start; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <!-- ARROW-005 | pdf p.60 | [이미지판독] normalized to construction circle D = 1 -->
+  <symbol id="arrow" viewBox="-0.5 -0.5 1 1">
+    <path d="M -0.488 -0.1015 L 0.119 -0.1015 L -0.048 -0.269 L 0.096 -0.403 L 0.5 0 L 0.096 0.403 L -0.048 0.269 L 0.119 0.1015 L -0.488 0.1015 Z"/>
+  </symbol>
+</svg>
+
+<main>
+  <section class="demo">
+    <p class="cap">Sign components (sign scale, --module)</p>
+    <div class="wall">
+
+      <!-- SIGN-005 ex.4: ↑ EE N QB RR [blank] → 2 -->
+      <div class="plate sign-direction" role="img" aria-label="Straight ahead: EE, N, QB, RR. Right: 2">
+        <div class="m m-center"><svg class="arrow" data-dir="up"><use href="#arrow"/></svg></div>
+        <div class="m m-center"><span class="disc" data-line="EE"><span>EE</span></span></div>
+        <div class="m m-center"><span class="disc" data-line="N"><span>N</span></span></div>
+        <div class="m m-center"><span class="disc" data-line="QB"><span>QB</span></span></div>
+        <div class="m m-center"><span class="disc" data-line="RR"><span>RR</span></span></div>
+        <div class="m m-blank"></div>
+        <div class="m m-center"><svg class="arrow" data-dir="right"><use href="#arrow"/></svg></div>
+        <div class="m m-center"><span class="disc" data-line="2"><span>2</span></span></div>
+      </div>
+
+      <!-- SIGN-005 ex.3: ↖ Downtown & Brooklyn ①②③ -->
+      <div class="plate sign-direction">
+        <div class="m m-center"><svg class="arrow" data-dir="up-left"><use href="#arrow"/></svg></div>
+        <div class="m m-4"><p class="t-direction trim">Downtown<br>&amp; Brooklyn</p></div>
+        <div class="m m-center"><span class="disc" data-line="1"><span>1</span></span></div>
+        <div class="m m-center"><span class="disc" data-line="2"><span>2</span></span></div>
+        <div class="m m-center"><span class="disc" data-line="3"><span>3</span></span></div>
+      </div>
+
+      <!-- SIGN-012: identification 6×1 and 4×1 (pdf p.66 examples) -->
+      <div class="plate sign-ident">
+        <div class="m m-6"><p class="t-ident trim">Times Square</p></div>
+      </div>
+      <div class="plate sign-ident">
+        <div class="m m-8"><p class="t-ident trim">Broadway Nassau</p></div>
+      </div>
+
+      <!-- SIGN-013: ← Exit [blank] ↑ Transfer (A)(AA)(CC)(E) -->
+      <div class="plate">
+        <div class="m m-center"><svg class="arrow" data-dir="left"><use href="#arrow"/></svg></div>
+        <div class="m m-exit"><p class="t-ident trim">Exit</p></div>
+        <div class="m m-blank"></div>
+        <div class="m m-center"><svg class="arrow" data-dir="up"><use href="#arrow"/></svg></div>
+        <div class="m m-transfer m-auto"><p class="t-ident trim">Transfer</p></div>
+        <div class="m m-center"><span class="disc" data-line="A"><span>A</span></span></div>
+        <div class="m m-center"><span class="disc" data-line="AA"><span>AA</span></span></div>
+        <div class="m m-center"><span class="disc" data-line="CC"><span>CC</span></span></div>
+        <div class="m m-center"><span class="disc" data-line="E"><span>E</span></span></div>
+      </div>
+
+      <!-- GRID-022 / COPY-012: train information sign -->
+      <div class="plate sign-train">
+        <div class="m m-4"><p class="t-direction trim">Uptown</p></div>
+        <div class="m m-center"><span class="disc" data-line="N"><span>N</span></span></div>
+        <div class="m m-center"><span class="disc" data-line="QB"><span>QB</span></span></div>
+        <div class="m m-info"><p class="t-info trim">To 57 St–7 Av</p></div>
+      </div>
+
+      <div style="display:flex; gap:24px; align-items:flex-start">
+        <!-- GRID-018: informational 2×1, Grid 1, inline disc -->
+        <div class="plate">
+          <div class="m m-2"><div class="stack-g1">
+            <p class="t-info trim">Free transfer</p>
+            <p class="t-info trim">Mon–Fri 7 am to 8:10 pm</p>
+            <p class="t-info trim">Change for <span class="disc disc--inline" data-line="F"><span>F</span></span></p>
+          </div></div>
+        </div>
+        <!-- SIGN-018: mandatory 1×1 -->
+        <div class="plate">
+          <div class="m m-mandatory"><div class="stack-g1">
+            <p class="t-info trim">No littering</p><p class="t-info trim">No smoking</p><p class="t-info trim">No spitting</p>
+          </div></div>
+        </div>
+        <!-- DISC-001 sizes -->
+        <div style="display:flex; gap:12px; align-items:flex-end">
+          <span class="disc" data-line="B"><span>B</span></span>
+          <span class="disc disc--m" data-line="6"><span>6</span></span>
+          <span class="disc disc--s" data-line="KK"><span>KK</span></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="demo">
+    <p class="cap">Document scale (DEC-005 … DEC-016)</p>
+    <nav aria-label="breadcrumb"><ol class="crumbs">
+      <li><a href="#">All trains</a></li>
+      <li><svg class="arrow" data-dir="right" aria-hidden="true"><use href="#arrow"/></svg></li>
+      <li><a href="#">Uptown &amp; The Bronx</a></li>
+    </ol></nav>
+    <h1>Times Square</h1>
+    <h2>Downtown &amp; Brooklyn</h2>
+    <p>Trains stop here at all times. Change for <span class="disc disc--inline" data-line="7"><span>7</span></span> and <span class="disc disc--inline" data-line="N"><span>N</span></span> on the lower level. Read the <a href="#">service notes</a> before travelling.</p>
+    <ul class="nav">
+      <li><a href="#"><svg class="arrow" data-dir="left" aria-hidden="true"><use href="#arrow"/></svg>Back</a></li>
+      <li><a href="#"><svg class="arrow" data-dir="up" aria-hidden="true"><use href="#arrow"/></svg>All trains</a></li>
+      <li><a href="#"><svg class="arrow" data-dir="up-right" aria-hidden="true"><use href="#arrow"/></svg>Bear right</a></li>
+    </ul>
+    <h3>Form</h3>
+    <form style="max-width:420px">
+      <label for="from">From</label><input id="from" value="57 St–7 Av">
+      <p class="error" style="margin-top:8px">Station not found</p>
+      <button type="button">Search</button> <button type="button" disabled>Disabled</button>
+    </form>
+    <h3>Directory</h3>
+    <table><thead><tr><th>Destination</th><th>How to get there</th></tr></thead>
+      <tbody><tr><td>Avenue M</td><td><span class="disc disc--inline" data-line="D"><span>D</span></span></td></tr>
+      <tr><td>Union Sq</td><td><span class="disc disc--inline" data-line="4"><span>4</span></span> <span class="disc disc--inline" data-line="5"><span>5</span></span> <span class="disc disc--inline" data-line="6"><span>6</span></span></td></tr></tbody></table>
+    <p class="notice">Temporary: weekend service changes.</p>
+    <h3>Compact menu</h3>
+    <div class="compact" style="max-width:360px">
+      <div class="compact__title">Times Square</div>
+      <div class="compact__item">Downtown &amp; Brooklyn</div>
+      <div class="compact__item">Mon–Fri 7 am to 8:10 pm</div>
+    </div>
+  </section>
+</main>
+</body>
+</html>
