@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>한글 대응 실험</title>
+<link rel="stylesheet" href="css/nycta.css">
+<script src="js/nycta.js" defer></script>
+<script>(function(){var q=location.search,local=location.protocol==='file:'||/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);if(/[?&]font=helvetica\b/.test(q)||(local&&!/[?&]font=albert\b/.test(q))){document.write('<link rel="stylesheet" href="preview/helvetica.css">');document.write('<link rel="stylesheet" href="preview/hangul.css">');document.write('<link rel="stylesheet" href="preview/hangul-cand.css">');}})();</script>
+<style>
+  /* lab scaffolding — not part of the system */
+  body { padding: 24px; }
+  .ui, .ui * { font-family: system-ui, sans-serif; letter-spacing: 0; word-spacing: normal; font-weight: 400; }
+  .ui { font-size: 14px; line-height: 1.45; max-width: 80ch; }
+  .ui h1 { font-size: 20px; font-weight: 600; margin: 0 0 8px; }
+  .ui h2 { font-size: 16px; font-weight: 600; margin: 0 0 2px; }
+  .ui p { margin: 0 0 6px; font-size: 13px; }
+  .ui code { font-family: ui-monospace, monospace; font-size: 12px; }
+  .controls { position: sticky; top: 0; z-index: 10; background: var(--bg); padding: 10px 0; margin: 0 0 20px; border-bottom: 1px solid #bbb; display: flex; gap: 24px; max-width: none; }
+  .controls label { display: flex; gap: 6px; align-items: center; }
+  .controls input { all: revert; }
+  section { margin: 0 0 32px; }
+  .wall { background: #d9d6d2; padding: 16px; display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
+  @media (prefers-color-scheme: dark) { .wall { background: #2a2a2a; } }
+  .box .trim { outline: 1px solid rgba(0,160,255,.9); outline-offset: 0; }
+  .box .m { outline: 1px dashed rgba(255,120,0,.8); outline-offset: -1px; }
+
+  /* A + B: Latin sign font first, then the Hangul companion (tools/build_hangul.py) */
+  [data-ko] { font-family: "Helvetica Neue NYCTA Preview", "Albert Sans NYCTA", var(--font-ko), sans-serif; }
+
+  /* D — script-level rules that do not depend on the font */
+  .D { --lh-body: 1.7; }                                       /* long-form Hangul needs more leading than Latin */
+  .D :is(.t-ident, .t-direction, .t-info, p) { word-break: keep-all; line-break: strict; overflow-wrap: anywhere; }
+  .D:not([data-ko]) { font-family: "Helvetica Neue NYCTA Preview", "Albert Sans NYCTA", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif; }
+  /* Hangul word gap = 0.34 × r cap; first-glyph pull = N/2 units — only on Korean text, English keeps DEC-018/025 */
+  .D[data-ko] :lang(ko) { word-spacing: var(--ws-ko); }
+  .D[data-ko] :is(.t-ident, .t-direction, .t-info):lang(ko) { --lsb-comp: var(--lsb-comp-ko); }
+
+  /* record: sections 0 and 1 show the state before DEC-032/033 */
+  section[data-v="now"] { font-family: "Helvetica Neue NYCTA Preview", "Albert Sans NYCTA", system-ui, sans-serif; --lh-body: 1.5; }
+  section[data-v="now"] :lang(ko) { word-break: normal; line-break: auto; word-spacing: var(--ws); --lsb-pull: var(--lsb-comp); }
+  .D:not([data-ko]) :lang(ko) { word-spacing: var(--ws); --lsb-pull: var(--lsb-comp); }
+  .D[data-ko] :lang(ko) { --lsb-pull: var(--lsb-comp-ko); }
+  .prose { max-width: 21em; font-size: 18px; line-height: var(--lh-body); background: var(--bg); padding: 12px 16px; margin: 0; }
+</style>
+</head>
+<body>
+<div class="ui">
+  <h1>한글 대응 실험: A 크기 · B 간격 · D 규칙</h1>
+  <p>맨 위가 지금 상태입니다. 아래로 갈수록 D(줄바꿈·대체 서체), A(한글 높이 = r × 대문자 높이, 대문자 띠 가운데 정렬), B(음절 사이 잉크 간격 = N 단위, 1단위 = cap/36)를 더합니다. 영문 판 <i>City Hall</i>은 크기 비교용입니다.</p>
+  <p>미리보기 한글은 Apple SD Gothic Neo Medium(맥 시스템 서체, 로컬 전용·배포 금지)입니다. <code>tools/build_hangul.py</code>로 만듭니다.</p>
+</div>
+<div class="ui controls">
+  <label><input id="box" type="checkbox"> 글자 상자(파랑 = 대문자 띠로 자른 글줄, 주황 = 모듈 칸)</label>
+</div>
+
+<template id="signs">
+  <div class="wall">
+    <div class="plate sign-ident"><div class="m"><p class="t-ident trim" lang="en">City Hall</p></div></div>
+    <div class="plate sign-ident"><div class="m"><p class="t-ident trim">시청</p></div></div>
+    <div class="plate sign-ident"><div class="m"><p class="t-ident trim">을지로입구</p></div></div>
+    <div class="plate sign-ident"><div class="m"><p class="t-ident trim">동대문역사문화공원</p></div></div>
+    <div class="plate sign-direction">
+      <div class="m m-center"><svg class="arrow" data-dir="up-left"><use href="#arrow"/></svg></div>
+      <div class="m m-4"><p class="t-direction trim">시청·종각<br>방면</p></div>
+      <div class="m m-center"><span class="disc" data-line="1"><span>1</span></span></div>
+      <div class="m m-center"><span class="disc" data-line="2"><span>2</span></span></div>
+    </div>
+    <div class="plate sign-direction">
+      <div class="m m-center"><svg class="arrow" data-dir="up-left"><use href="#arrow"/></svg></div>
+      <div class="m m-4"><p class="t-direction trim" lang="en">Downtown<br>&amp; Brooklyn</p></div>
+    </div>
+    <div class="plate">
+      <div class="m m-2"><div class="stack-g1">
+        <p class="t-info trim">무료 환승</p>
+        <p class="t-info trim">평일 오전 7시–오후 8시 10분</p>
+        <p class="t-info trim"><span class="disc disc--inline" data-line="F"><span>F</span></span> 갈아타는 곳</p>
+        <p class="t-info trim">34 St–Herald Sq 방면</p>
+      </div></div>
+    </div>
+    <div class="plate">
+      <div class="m m-2"><div class="stack-g1">
+        <p class="t-info trim" lang="en">Free transfer</p>
+        <p class="t-info trim" lang="en">Mon–Fri 7 am to 8:10 pm</p>
+        <p class="t-info trim" lang="en">Change for <span class="disc disc--inline" data-line="F"><span>F</span></span></p>
+      </div></div>
+    </div>
+    <p class="prose">주말에는 데칼브 애비뉴와 브라이턴 비치 사이에 B 열차가 다니지 않습니다. 대신 D 열차를 타십시오. 환승통로는 계단 옆 엘리베이터를 이용하세요.</p>
+  </div>
+</template>
+
+<div class="ui"><h1 style="margin-top:8px">SUIT · 굵기와 자간</h1><p>r 1.1. <b>윗선 정렬</b>: 한글 윗선 = 대문자 윗선이라 위 여백(½″)이 영문과 같고, 남는 0.1 cap은 기준선 아래로 내려감. <b>고정폭 + 전역 자간 T</b>: SUIT 원래 고정폭(모든 음절 같은 폭)에 모든 글자 같은 값 T(단위 = cap/36)를 더함. 영문 간격은 그대로.</p></div>
+<section data-v="D" class="D" data-ko="cand-suit"><div class="ui"><h2>이전 · wght 604 · 가운데 정렬 · 잉크 간격 4단위</h2><p>지난 시안. 한글이 위 띠에 거의 붙음(0.05″).</p></div></section>
+<section data-v="D" class="D" data-ko="cand-suit-604-t0"><div class="ui"><h2>wght 604 · 윗선 정렬 · 고정폭 T 0</h2><p>농도 0.375(영문 0.380).</p></div></section>
+<section data-v="D" class="D" data-ko="cand-suit-700-t0"><div class="ui"><h2>Bold 700 · 윗선 정렬 · 고정폭 T 0</h2><p>농도 0.412.</p></div></section>
+<section data-v="D" class="D" data-ko="cand-suit-700-t-1"><div class="ui"><h2>Bold 700 · 윗선 정렬 · 고정폭 T −1</h2><p>자간 −1단위(≈ −2% em). 농도 0.423.</p></div></section>
+<section data-v="D" class="D" data-ko="cand-suit-700-t-2"><div class="ui"><h2>Bold 700 · 윗선 정렬 · 고정폭 T −2</h2><p>자간 −2단위(≈ −4% em). 농도 0.434.</p></div></section>
+<div class="ui"><h1 style="margin-top:40px">서체 후보 비교 · r 1.1 · N 4</h1><p>모두 같은 처리(A 크기 · B 간격 · D 규칙). 굵기는 글줄 농도가 영문(헬베티카 미리보기 0.380)과 같아지는 값으로 코드가 고름. 모두 OFL.</p></div>
+<section data-v="D" class="D" data-ko="r110-n4"><div class="ui"><h2>기준 · Apple SD Gothic Neo SemiBold</h2><p>맥 시스템 서체(산돌고딕Neo 바탕). 배포 불가. 농도 0.373.</p></div></section>
+<section data-v="D" class="D" data-ko="cand-pretendard"><div class="ui"><h2>Pretendard · wght 532</h2><p>농도 0.380.</p></div></section>
+<section data-v="D" class="D" data-ko="cand-suit"><div class="ui"><h2>SUIT · wght 604</h2><p>농도 0.380.</p></div></section>
+<section data-v="D" class="D" data-ko="cand-wanted"><div class="ui"><h2>Wanted Sans · wght 528</h2><p>농도 0.380.</p></div></section>
+<section data-v="D" class="D" data-ko="cand-plex"><div class="ui"><h2>IBM Plex Sans KR · Medium</h2><p>농도 0.357.</p></div></section>
+<section data-v="D" class="D" data-ko="cand-noto"><div class="ui"><h2>Noto Sans KR · wght 486</h2><p>농도 0.380.</p></div></section>
+<div class="ui"><h1 style="margin-top:40px">처리 단계 비교 (Apple SD Gothic Neo)</h1></div>
+<section data-v="now"><div class="ui"><h2>0. 처음 (DEC-032/033 이전)</h2><p>Albert/헬베티카에 한글이 없어 시스템 대체 서체(맥 = Apple SD Gothic Neo)로 나옴. 크기·간격·줄바꿈 보정 없음.</p></div></section>
+<section data-v="D" class="D"><div class="ui"><h2>1. D만</h2><p><code>word-break: keep-all</code>, <code>line-break: strict</code>, 대체 서체 순서 명시, 긴 글 줄높이 1.7. 크기·간격은 그대로.</p></div></section>
+<section data-v="D" class="D" data-ko="raw"><div class="ui"><h2>2. A + D (r 1.0, 간격은 원래 고정폭, Medium)</h2><p>한글 높이를 대문자와 같게 하고 대문자 띠 가운데에 맞춤. 글자 폭은 원래 고정폭(평균 간격 ≈ 3.8단위, 글자마다 다름). 0.82배로 줄면서 획이 가늘어짐(농도 0.303 vs 영문 0.380).</p></div></section>
+<section data-v="D" class="D" data-ko="r100-n4"><div class="ui"><h2>3. A + B + D · r 1.0 · N 4 · Bold</h2><p>모든 음절 사이 잉크 간격 4단위(= TYPE-024 기본 2 + 2). 원래 평균(≈3.8)과 비슷하지만 고르게. 굵기는 글줄 농도를 영문과 맞춰 Bold(0.375 vs 영문 0.380).</p></div></section>
+<section data-v="D" class="D" data-ko="r100-n6"><div class="ui"><h2>4. A + B + D · r 1.0 · N 6 · Bold</h2><p>잉크 간격 6단위(0.17 cap). 농도 0.355.</p></div></section>
+<section data-v="D" class="D" data-ko="r110-n4"><div class="ui"><h2>5. A + B + D · r 1.1 · N 4 · SemiBold</h2><p>한글을 대문자보다 10% 크게(위아래로 0.05 cap씩 띠를 넘음). 커진 만큼 한 단계 가는 SemiBold로 농도 0.373.</p></div></section>
+<section data-v="D" class="D" data-ko="r110-n6"><div class="ui"><h2>6. A + B + D · r 1.1 · N 6 · SemiBold</h2><p>잉크 간격 6단위. 농도 0.355.</p></div></section>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="arrow" viewBox="-0.5 -0.5 1 1">
+    <path d="M -0.488 -0.1015 L 0.119 -0.1015 L -0.048 -0.269 L 0.096 -0.403 L 0.5 0 L 0.096 0.403 L -0.048 0.269 L 0.119 0.1015 L -0.488 0.1015 Z"/>
+  </symbol>
+</svg>
+<script>
+  const tpl = document.getElementById('signs');
+  document.querySelectorAll('section[data-v]').forEach(s => s.appendChild(tpl.content.cloneNode(true)));
+  document.getElementById('box').addEventListener('change', e => document.body.classList.toggle('box', e.target.checked));
+</script>
+</body>
+</html>

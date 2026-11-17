@@ -18,13 +18,23 @@
   font-style: normal;
   font-display: swap;
 }
+@font-face {
+  font-family: "NYCTA Hangul";
+  src: url("../fonts/nycta-hangul.woff2") format("woff2");
+  font-weight: 100 900;                       /* DEC-032 | - | [설계결정] one static weight (SUIT wght 700); range stops faux bold */
+  /* DEC-032 | - | [변환] SUIT (OFL, renamed) Hangul only: frame = 1.1 cap, top on the cap line, native fixed width − 1 unit.
+     Only syllables SUIT draws (2,668 incl. all KS X 1001); others fall back. */
+  unicode-range: U+3131-318E, U+AC00-D7A3;
+  font-style: normal;
+  font-display: swap;
+}
 
 /* -------------------------------------------------------------------------
    1. Tokens
    ------------------------------------------------------------------------- */
 :root {
   /* --- typeface --- */
-  --font-sign: "Albert Sans NYCTA", system-ui, sans-serif; /* DEC-017, DEC-024 | - | [설계결정] substitute for TYPE-001 Standard Medium */
+  --font-sign: "Albert Sans NYCTA", "NYCTA Hangul", system-ui, sans-serif; /* DEC-017, DEC-024, DEC-032 | - | [설계결정] substitute for TYPE-001 Standard Medium; Hangul companion */
   --font-weight-light: 600;                             /* DEC-017 | - | [설계결정] Medium equivalent (TYPE-002), dark type on white */
   --font-weight: var(--font-weight-light);              /* DEC-017, DEC-019 | - | [설계결정] current page weight (dark mode swaps it) */
   --font-weight-dark: 560;                              /* DEC-019 | - | [설계결정] irradiation compensation */
@@ -32,6 +42,8 @@
   --ls: 0em;                                            /* DEC-024 | pdf p.13 | [변환] spacing now comes from the chart kerning in the font */
   --ws: -0.1485em;                                      /* DEC-018, TYPE-021 | pdf p.62,65 | [변환] word gap = 0.34 cap ink-to-ink (manual samples '& Brooklyn', 'Broadway Nassau') */
   --lsb-comp: 0.064em;                                  /* DEC-025 | pdf p.62,66 | [변환] straight-stem capitals (B D E F H I K L M N P R U): font side bearing − master inset; round letters end up ≈0.02em left (optical overshoot) */
+  --ws-ko: -0.0737em;                                   /* DEC-033, DEC-018 | - | [변환] Hangul word gap ink-to-ink = 0.34 × 1.1 cap */
+  --lsb-comp-ko: 0.0199em;                              /* DEC-033, DEC-025 | - | [변환] median Hangul left side bearing (after −1 unit tracking) */
   --trim-k: 0.35;                                       /* GRID-003 | - | [변환] (ascent+descent)/2 − (ascent − cap) of the web font */
 
   /* --- module (sign scale) --- */
@@ -135,7 +147,15 @@
 *, *::before, *::after { box-sizing: border-box; border-radius: 0; } /* DEC-009 | - | [설계결정] exact rectangles everywhere */
 /* em-based spacing must resolve against each element's own font-size, so it is set on every element
    (an inherited letter-spacing would keep the body's px value) — DEC-018 | - | [변환] */
-* { letter-spacing: var(--ls); word-spacing: var(--ws); }
+* { letter-spacing: var(--ls); word-spacing: var(--ws); --lsb-pull: var(--lsb-comp); }
+/* Korean text — set per element by its own language, so lang="en" inside a Korean page keeps the Latin values */
+:lang(ko) {
+  word-break: keep-all;                                 /* DEC-033 | - | [설계결정] never break inside a Korean word */
+  line-break: strict;                                   /* DEC-033 | - | [설계결정] */
+  word-spacing: var(--ws-ko);                           /* DEC-033, DEC-018 | - | [변환] */
+  --lsb-pull: var(--lsb-comp-ko);                       /* DEC-033, DEC-025 | - | [변환] */
+}
+body:lang(ko) { --lh-body: 1.7; }                       /* DEC-033, DEC-020 | - | [설계결정] long-form Hangul */
 
 html {
   font-family: var(--font-sign);                        /* TYPE-001, DEC-017 */
@@ -187,7 +207,7 @@ body {
 }
 .t-ident, .t-direction, .t-info { line-height: var(--lh); margin: 0; }
 /* first glyph sits on the ½in margin like the masters: pull text left by the font's extra side bearing — DEC-025 */
-.t-ident, .t-direction, .t-info, h1, .h1, h2, .h2, h3, .h3, .compact__title, .compact__item { margin-inline-start: calc(-1 * var(--lsb-comp)); }
+.t-ident, .t-direction, .t-info, h1, .h1, h2, .h2, h3, .h3, .compact__title, .compact__item { margin-inline-start: calc(-1 * var(--lsb-pull)); } /* DEC-025, DEC-033 */
 .t-info--clamp6 { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 6; overflow: hidden; } /* TYPE-012 | pdf p.8 | [확정] */
 
 /* -------------------------------------------------------------------------
@@ -230,7 +250,7 @@ p { margin: 0 0 var(--doc-space-3); }
   width: max-content;
   max-width: 100%;
   min-width: 0;
-  overflow-x: auto;                                     /* DEC-023 | - | [설계결정] long plates scroll inside narrow screens */
+  overflow: visible;                                    /* DEC-023 | - | [설계결정] plates never scroll inside; a plate wider than the screen sticks out */
 }
 .m {                                                    /* GRID-012 | pdf p.64 | [확정] 1 ft module cell, field 12in */
   flex: 0 0 auto;
@@ -248,6 +268,7 @@ p { margin: 0 0 var(--doc-space-3); }
    names that still exceed a fixed plate (e.g. 'Avenue M' needs ≈4.5 ft) use .m-auto (DEC-022). */
 .m-blank { padding: 0; }                                /* SIGN-004 | pdf p.62 | [확정] blank 1×1 between directions */
 .m-center { display: grid; place-items: center; padding: 0; } /* GRID-016, GRID-017 | pdf p.65 | [이미지판독] disc/arrow centered */
+.m-center { overflow: clip; }                           /* DEC-023 | - | [설계결정] a rotated arrow's box must not spill out; ink stays inside the 11in circle */
 
 .stack-g1 > * + * { margin-top: var(--space-gap-g1); } /* GRID-007 | pdf p.11 | [이미지판독] */
 .stack-g2 > * + * { margin-top: var(--space-gap-g2); } /* GRID-006 | pdf p.10 | [이미지판독] */
@@ -512,7 +533,7 @@ td { padding: var(--doc-space-1); border-bottom: var(--doc-rule) solid var(--fg)
   --p-trim: calc((var(--trim-k) - var(--lh-g1) / 2) * 1em); /* GRID-003 | - | [변환] same as .trim fallback */
   font-size: inherit;
   line-height: var(--lh-g1);
-  margin: var(--p-trim) 0 var(--p-trim) calc(-1 * var(--lsb-comp)); /* DEC-025 | - | [변환] first glyph on the ½in margin */
+  margin: var(--p-trim) 0 var(--p-trim) calc(-1 * var(--lsb-pull)); /* DEC-025, DEC-033 | - | [변환] first glyph on the ½in margin */
 }
 .popup__text > * + * { margin-block-start: calc(var(--p-in) * 0.5 + var(--p-trim)); } /* GRID-007 | pdf p.11 | [이미지판독] baseline → next cap line ½in */
 @supports (text-box: trim-both cap alphabetic) {

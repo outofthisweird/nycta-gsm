@@ -14,14 +14,14 @@
   .sec > .no { font-size: 12px; letter-spacing: 0; color: var(--c-grey); margin: 0 0 4px; }
   .sec > .lead { font-size: 15px; letter-spacing: 0; word-spacing: normal; line-height: 1.5; max-width: 60ch; margin: 0 0 var(--doc-space-3); }
   .cap { font-size: 12px; color: var(--c-grey); margin: 0 0 6px; letter-spacing: 0; word-spacing: normal; line-height: 1.4; }
-  .wall { background: #d9d6d2; padding: 24px; display: grid; grid-template-columns: minmax(0,1fr); gap: 28px; justify-items: start; overflow-x: auto; }
+  .wall { background: #d9d6d2; padding: 24px; display: grid; grid-template-columns: minmax(0,1fr); gap: 28px; justify-items: start; }
   @media (prefers-color-scheme: dark) { .wall { background: #2a2a2a; } }
   .wall > figure { margin: 0; }
   .show-grid .m { outline: 1px dashed rgba(0,180,255,.9); outline-offset: -1px; }
   .flexrow { display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start; }
   .scale-row { display: grid; grid-template-columns: 140px minmax(0,1fr); gap: 16px; align-items: end; padding: 12px 0; border-top: var(--doc-rule) solid var(--fg); }
   .scale-row .cap { margin: 0; }
-  .scale-row > :last-child { overflow-x: auto; padding-left: var(--lsb-comp); }
+  .scale-row > :last-child { padding-left: var(--lsb-comp); }
   @media (max-width: 600px) { .scale-row { grid-template-columns: minmax(0,1fr); gap: 8px; } }
   .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0; }
   .sw { padding: 12px; min-height: 96px; display: flex; flex-direction: column; justify-content: flex-end; font-size: 13px; letter-spacing: 0; word-spacing: normal; line-height: 1.35; }
@@ -47,7 +47,7 @@
 <main>
   <header class="sec">
     <p class="cap">NYCTA Graphics Standards Manual 1970 → Web</p>
-    <h1>Specimen</h1>
+    <h1 lang="en">Specimen</h1>
     <p class="lead">원장(ledger.yaml)에 있는 규칙을 한 페이지에 모은 견본입니다. 회색 배경은 벽 역할을 하는 페이지 장식이고, 시스템에 속하지 않습니다.</p>
   </header>
 
@@ -56,10 +56,10 @@
     <p class="no">01 · TYPE-004–007</p>
     <h2>글자 크기 세 가지</h2>
     <p class="lead">대문자 높이로 정합니다. 9″는 역명·Exit·Transfer, 4¼″는 방향, 1⅜″는 안내 문구에 씁니다. 글자 간격은 간격표(pdf p.13)를 서체 안에 넣었으므로 CSS에서는 0입니다.</p>
-    <div class="scale-row"><p class="cap">9″ · 역명</p><p class="t-ident trim">Grand Central</p></div>
-    <div class="scale-row"><p class="cap">4¼″ · 방향</p><p class="t-direction trim">Downtown &amp; Brooklyn</p></div>
-    <div class="scale-row"><p class="cap">1⅜″ · 안내</p><p class="t-info trim">Mon–Fri 7 am to 8:10 pm · Change for express</p></div>
-    <div class="scale-row"><p class="cap">글자 견본 (4¼″)</p><p class="t-direction trim">ABCDEFGHIJKLM<br>NOPQRSTUVWXYZ<br>abcdefghijklm<br>nopqrstuvwxyz<br>0123456789 &amp;–</p></div>
+    <div class="scale-row"><p class="cap">9″ · 역명</p><p class="t-ident trim" lang="en">Grand Central</p></div>
+    <div class="scale-row"><p class="cap">4¼″ · 방향</p><p class="t-direction trim" lang="en">Downtown &amp; Brooklyn</p></div>
+    <div class="scale-row"><p class="cap">1⅜″ · 안내</p><p class="t-info trim" lang="en">Mon–Fri 7 am to 8:10 pm · Change for express</p></div>
+    <div class="scale-row"><p class="cap">글자 견본 (4¼″)</p><p class="t-direction trim" lang="en">ABCDEFGHIJKLM<br>NOPQRSTUVWXYZ<br>abcdefghijklm<br>nopqrstuvwxyz<br>0123456789 &amp;–</p></div>
   </section>
 
   <!-- 2. Module grid -->
@@ -68,11 +68,11 @@
     <h2>1피트 모듈</h2>
     <p class="lead">파란 점선이 1피트 칸입니다. 위에 1⅝″ 검정 띠가 있고, 글자는 위·왼쪽 ½″ 여백에서 시작합니다. 판 폭은 1·2·4·6·8칸입니다.</p>
     <div class="wall show-grid">
-      <figure><p class="cap">1×1</p><div class="plate"><div class="m m-center"><span class="disc" data-line="A"><span>A</span></span></div></div></figure>
-      <figure><p class="cap">2×1 · 안내</p><div class="plate"><div class="m m-2"><div class="stack-g1"><p class="t-info trim">Free transfer</p><p class="t-info trim">to uptown trains</p></div></div></div></figure>
-      <figure><p class="cap">4×1 · 방향</p><div class="plate"><div class="m m-4"><p class="t-direction trim">Uptown<br>&amp; The Bronx</p></div></div></figure>
-      <figure><p class="cap">역명 · 이름에 맞춤, ½ ft 단위 (DEC-030)</p><div class="plate sign-ident"><div class="m m-6"><p class="t-ident trim">Times Square</p></div></div></figure>
-      <figure><p class="cap">역명 · 이름에 맞춤, ½ ft 단위 (DEC-030)</p><div class="plate sign-ident"><div class="m m-8"><p class="t-ident trim">Union Square</p></div></div></figure>
+      <figure><p class="cap">1×1</p><div class="plate" lang="en"><div class="m m-center"><span class="disc" data-line="A"><span>A</span></span></div></div></figure>
+      <figure><p class="cap">2×1 · 안내</p><div class="plate" lang="en"><div class="m m-2"><div class="stack-g1"><p class="t-info trim" lang="en">Free transfer</p><p class="t-info trim" lang="en">to uptown trains</p></div></div></div></figure>
+      <figure><p class="cap">4×1 · 방향</p><div class="plate" lang="en"><div class="m m-4"><p class="t-direction trim" lang="en">Uptown<br>&amp; The Bronx</p></div></div></figure>
+      <figure><p class="cap">역명 · 이름에 맞춤, ½ ft 단위 (DEC-030)</p><div class="plate sign-ident" lang="en"><div class="m m-6"><p class="t-ident trim" lang="en">Times Square</p></div></div></figure>
+      <figure><p class="cap">역명 · 이름에 맞춤, ½ ft 단위 (DEC-030)</p><div class="plate sign-ident" lang="en"><div class="m m-8"><p class="t-ident trim" lang="en">Union Square</p></div></div></figure>
     </div>
   </section>
 
@@ -101,7 +101,7 @@
     <p class="no">04 · DISC-001, 004, 007</p>
     <h2>노선 원판 26개</h2>
     <p class="lead">지름은 모듈의 11/12이고, 글자 대문자 높이는 지름의 0.408입니다. 노선마다 글자 위치를 마스터(pdf p.15–40)에서 재서 맞췄습니다. 노란 원판은 검정 글자이고, 다크 모드에서는 검정 원판에 테두리가 생깁니다.</p>
-    <div class="discgrid">
+    <div class="discgrid" lang="en">
       <div><span class="disc" data-line="1"><span>1</span></span></div>
       <div><span class="disc" data-line="2"><span>2</span></span></div>
       <div><span class="disc" data-line="3"><span>3</span></span></div>
@@ -159,7 +159,7 @@
     <p class="lead">왼쪽에서 오른쪽으로 화살표 → 원판 → 글 순서로 놓습니다. 방향이 둘이면 빈 칸 하나로 나눕니다.</p>
     <div class="wall">
       <figure><p class="cap">방향 · 두 방향 사이 빈 칸</p>
-        <div class="plate sign-direction" role="img" aria-label="Straight ahead: EE, N, QB, RR. Right: 2">
+        <div class="plate sign-direction" role="img" aria-label="Straight ahead: EE, N, QB, RR. Right: 2" lang="en">
           <div class="m m-center"><svg class="arrow" data-dir="up"><use href="#arrow"/></svg></div>
           <div class="m m-center"><span class="disc" data-line="EE"><span>EE</span></span></div>
           <div class="m m-center"><span class="disc" data-line="N"><span>N</span></span></div>
@@ -170,45 +170,45 @@
           <div class="m m-center"><span class="disc" data-line="2"><span>2</span></span></div>
         </div></figure>
       <figure><p class="cap">방향 · 글 두 줄</p>
-        <div class="plate sign-direction">
+        <div class="plate sign-direction" lang="en">
           <div class="m m-center"><svg class="arrow" data-dir="up-left"><use href="#arrow"/></svg></div>
-          <div class="m m-4"><p class="t-direction trim">Downtown<br>&amp; Brooklyn</p></div>
+          <div class="m m-4"><p class="t-direction trim" lang="en">Downtown<br>&amp; Brooklyn</p></div>
           <div class="m m-center"><span class="disc" data-line="1"><span>1</span></span></div>
           <div class="m m-center"><span class="disc" data-line="2"><span>2</span></span></div>
           <div class="m m-center"><span class="disc" data-line="3"><span>3</span></span></div>
         </div></figure>
       <figure><p class="cap">Exit(빨강 바탕 흰 글자) · Transfer(노랑 바탕 검정 글자)</p>
-        <div class="plate">
+        <div class="plate" lang="en">
           <div class="m m-center"><svg class="arrow" data-dir="left"><use href="#arrow"/></svg></div>
-          <div class="m m-exit"><p class="t-ident trim">Exit</p></div>
+          <div class="m m-exit"><p class="t-ident trim" lang="en">Exit</p></div>
           <div class="m m-blank"></div>
           <div class="m m-center"><svg class="arrow" data-dir="up"><use href="#arrow"/></svg></div>
-          <div class="m m-transfer m-auto"><p class="t-ident trim">Transfer</p></div>
+          <div class="m m-transfer m-auto"><p class="t-ident trim" lang="en">Transfer</p></div>
           <div class="m m-center"><span class="disc" data-line="A"><span>A</span></span></div>
           <div class="m m-center"><span class="disc" data-line="AA"><span>AA</span></span></div>
           <div class="m m-center"><span class="disc" data-line="CC"><span>CC</span></span></div>
           <div class="m m-center"><span class="disc" data-line="E"><span>E</span></span></div>
         </div></figure>
       <figure><p class="cap">열차 안내</p>
-        <div class="plate sign-train">
-          <div class="m m-4"><p class="t-direction trim">Uptown</p></div>
+        <div class="plate sign-train" lang="en">
+          <div class="m m-4"><p class="t-direction trim" lang="en">Uptown</p></div>
           <div class="m m-center"><span class="disc" data-line="N"><span>N</span></span></div>
           <div class="m m-center"><span class="disc" data-line="QB"><span>QB</span></span></div>
-          <div class="m m-info"><p class="t-info trim">To 57 St–7 Av</p></div>
+          <div class="m m-info"><p class="t-info trim" lang="en">To 57 St–7 Av</p></div>
         </div></figure>
       <div class="flexrow">
         <figure><p class="cap">안내 2×1 · 글 옆 작은 원판</p>
-          <div class="plate"><div class="m m-2"><div class="stack-g1">
-            <p class="t-info trim">Free transfer</p>
-            <p class="t-info trim">Mon–Fri 7 am to 8:10 pm</p>
-            <p class="t-info trim">Change for <span class="disc disc--inline" data-line="F"><span>F</span></span></p>
+          <div class="plate" lang="en"><div class="m m-2"><div class="stack-g1">
+            <p class="t-info trim" lang="en">Free transfer</p>
+            <p class="t-info trim" lang="en">Mon–Fri 7 am to 8:10 pm</p>
+            <p class="t-info trim" lang="en">Change for <span class="disc disc--inline" data-line="F"><span>F</span></span></p>
           </div></div></div></figure>
         <figure><p class="cap">의무 1×1 · 빨강 글자</p>
-          <div class="plate"><div class="m m-mandatory"><div class="stack-g1">
-            <p class="t-info trim">No littering</p><p class="t-info trim">No smoking</p><p class="t-info trim">No spitting</p>
+          <div class="plate" lang="en"><div class="m m-mandatory"><div class="stack-g1">
+            <p class="t-info trim" lang="en">No littering</p><p class="t-info trim" lang="en">No smoking</p><p class="t-info trim" lang="en">No spitting</p>
           </div></div></div></figure>
         <figure><p class="cap">반전 · 회색 바탕</p>
-          <div class="plate"><div class="m m-2 m-reverse"><p class="t-direction trim">Exit only</p></div></div></figure>
+          <div class="plate" lang="en"><div class="m m-2 m-reverse"><p class="t-direction trim" lang="en">Exit only</p></div></div></figure>
       </div>
     </div>
   </section>
@@ -282,7 +282,7 @@
     <h2>안내 팝업</h2>
     <p class="lead">나중 시기 MTA 검정 안내판을 바탕으로, 페이지와 반대 색의 판에 안내 크기 글자를 Grid 1 간격으로 놓았습니다. 위에 ½″ 띠와 ⅛″ 선, 선에서 첫 대문자 선까지 ½″. 앞 원판은 첫 줄 대문자 선부터 둘째 줄 기준선까지 걸칩니다. 다크 모드에서는 흰 판에 검정 글자가 됩니다.</p>
     <div class="flexrow">
-<div class="popup" role="dialog" aria-labelledby="sp-a-t">
+<div class="popup" role="dialog" aria-labelledby="sp-a-t" lang="en">
   <div class="popup__body">
     <span class="disc popup__disc" data-line="3" role="img" aria-label="3 train"><span>3</span></span>
     <div class="popup__text">
@@ -293,7 +293,7 @@
     </div>
   </div>
 </div>
-<div class="popup" role="dialog" style="--popup-fs: 1.5rem" aria-labelledby="sp-b-t">
+<div class="popup" role="dialog" style="--popup-fs: 1.5rem" aria-labelledby="sp-b-t" lang="en">
   <div class="popup__body">
     <div class="popup__text">
       <p id="sp-b-t">Weekend service change</p>
