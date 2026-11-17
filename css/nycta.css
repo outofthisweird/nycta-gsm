@@ -369,6 +369,11 @@ p { margin: 0 0 var(--doc-space-3); }
 .sign-direction .m-auto .t-direction { margin-top: 0; }
 /* Identification: 8×1 (or 4/6) one line, 9in — SIGN-012 | pdf p.66 | [확정] */
 .sign-ident .t-ident { margin-top: 0; }
+/* DEC-022 | pdf p.66 | [설계결정] ID copy cell = auto width ≥ nominal plate, so a name that runs long
+   (Helvetica 'Times Square' ≈ +3% on 6 ft) widens the plate instead of scrolling inside it */
+.sign-ident .m-4 { width: max-content; min-width: calc(var(--module) * 4); }
+.sign-ident .m-6 { width: max-content; min-width: calc(var(--module) * 6); }
+.sign-ident .m-8 { width: max-content; min-width: calc(var(--module) * 8); }
 /* Exit: white on red, 2×1, 9in type — SIGN-013, COLOR-010 | pdf p.67 | [확정] */
 .m-exit     { background: var(--c-exit-bg); color: var(--c-exit-fg); width: auto; min-width: calc(var(--module) * 2); padding-right: var(--space-margin); }
 /* Transfer: black on yellow, 4×1, 9in type — SIGN-013, COLOR-011 | pdf p.67 | [확정] */
