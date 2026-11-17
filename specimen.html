@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NYCTA 1970 → Web · 견본</title>
+<link rel="stylesheet" href="css/nycta.css">
+<script>/* ?font=helvetica → local preview font (tools/build_fonts.py helvetica). Never ship. */ if(/[?&]font=helvetica\b/.test(location.search)) document.write('<link rel="stylesheet" href="preview/helvetica.css">');</script>
+<style>
+  /* page scaffolding only (not part of the system) */
+  main { padding: var(--doc-space-4) var(--doc-space-3); max-width: 1200px; }
+  .sec { margin: 0 0 var(--doc-space-5); }
+  .sec > .no { font-size: 12px; letter-spacing: 0; color: var(--c-grey); margin: 0 0 4px; }
+  .sec > .lead { font-size: 15px; letter-spacing: 0; word-spacing: normal; line-height: 1.5; max-width: 60ch; margin: 0 0 var(--doc-space-3); }
+  .cap { font-size: 12px; color: var(--c-grey); margin: 0 0 6px; letter-spacing: 0; word-spacing: normal; line-height: 1.4; }
+  .wall { background: #d9d6d2; padding: 24px; display: grid; grid-template-columns: minmax(0,1fr); gap: 28px; justify-items: start; overflow-x: auto; }
+  @media (prefers-color-scheme: dark) { .wall { background: #2a2a2a; } }
+  .wall > figure { margin: 0; }
+  .show-grid .m { outline: 1px dashed rgba(0,180,255,.9); outline-offset: -1px; }
+  .flexrow { display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start; }
+  .scale-row { display: grid; grid-template-columns: 140px minmax(0,1fr); gap: 16px; align-items: end; padding: 12px 0; border-top: var(--doc-rule) solid var(--fg); }
+  .scale-row .cap { margin: 0; }
+  .scale-row > :last-child { overflow-x: auto; padding-left: var(--lsb-comp); }
+  @media (max-width: 600px) { .scale-row { grid-template-columns: minmax(0,1fr); gap: 8px; } }
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0; }
+  .sw { padding: 12px; min-height: 96px; display: flex; flex-direction: column; justify-content: flex-end; font-size: 13px; letter-spacing: 0; word-spacing: normal; line-height: 1.35; }
+  .sw b { font-size: 16px; }
+  .discgrid { display: grid; grid-template-columns: repeat(auto-fill, var(--module)); gap: 0; background: var(--bg); padding: 0; }
+  .discgrid > div { width: var(--module); height: var(--module); display: grid; place-items: center; }
+  .arrows { display: flex; flex-wrap: wrap; background: var(--bg); }
+  .arrows > figure { margin: 0; width: var(--module); }
+  .arrows .m { height: var(--module); }
+  .arrows figcaption { font-size: 11px; color: var(--c-grey); letter-spacing: 0; text-align: center; padding: 4px 0; }
+  .doc-demo { max-width: 760px; }
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--doc-space-4); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <!-- ARROW-005 | pdf p.60 | [이미지판독] normalized to construction circle D = 1 -->
+  <symbol id="arrow" viewBox="-0.5 -0.5 1 1">
+    <path d="M -0.488 -0.1015 L 0.119 -0.1015 L -0.048 -0.269 L 0.096 -0.403 L 0.5 0 L 0.096 0.403 L -0.048 0.269 L 0.119 0.1015 L -0.488 0.1015 Z"/>
+  </symbol>
+</svg>
+
+<main>
+  <header class="sec">
+    <p class="cap">NYCTA Graphics Standards Manual 1970 → Web</p>
+    <h1>Specimen</h1>
+    <p class="lead">원장(ledger.yaml)에 있는 규칙을 한 페이지에 모은 견본입니다. 회색 배경은 벽 역할을 하는 페이지 장식이고, 시스템에 속하지 않습니다.</p>
+  </header>
+
+  <!-- 1. Type scale -->
+  <section class="sec">
+    <p class="no">01 · TYPE-004–007</p>
+    <h2>글자 크기 세 가지</h2>
+    <p class="lead">대문자 높이로 정합니다. 9″는 역명·Exit·Transfer, 4¼″는 방향, 1⅜″는 안내 문구에 씁니다. 글자 간격은 간격표(pdf p.13)를 서체 안에 넣었으므로 CSS에서는 0입니다.</p>
+    <div class="scale-row"><p class="cap">9″ · 역명</p><p class="t-ident trim">Grand Central</p></div>
+    <div class="scale-row"><p class="cap">4¼″ · 방향</p><p class="t-direction trim">Downtown &amp; Brooklyn</p></div>
+    <div class="scale-row"><p class="cap">1⅜″ · 안내</p><p class="t-info trim">Mon–Fri 7 am to 8:10 pm · Change for express</p></div>
+    <div class="scale-row"><p class="cap">글자 견본 (4¼″)</p><p class="t-direction trim">ABCDEFGHIJKLM<br>NOPQRSTUVWXYZ<br>abcdefghijklm<br>nopqrstuvwxyz<br>0123456789 &amp;–</p></div>
+  </section>
+
+  <!-- 2. Module grid -->
+  <section class="sec">
+    <p class="no">02 · GRID-002, 003, 012, 013</p>
+    <h2>1피트 모듈</h2>
+    <p class="lead">파란 점선이 1피트 칸입니다. 위에 1⅝″ 검정 띠가 있고, 글자는 위·왼쪽 ½″ 여백에서 시작합니다. 판 폭은 1·2·4·6·8칸입니다.</p>
+    <div class="wall show-grid">
+      <figure><p class="cap">1×1</p><div class="plate"><div class="m m-center"><span class="disc" data-line="A"><span>A</span></span></div></div></figure>
+      <figure><p class="cap">2×1 · 안내</p><div class="plate"><div class="m m-2"><div class="stack-g1"><p class="t-info trim">Free transfer</p><p class="t-info trim">to uptown trains</p></div></div></div></figure>
+      <figure><p class="cap">4×1 · 방향</p><div class="plate"><div class="m m-4"><p class="t-direction trim">Uptown<br>&amp; The Bronx</p></div></div></figure>
+      <figure><p class="cap">6×1 · 역명</p><div class="plate sign-ident"><div class="m m-6"><p class="t-ident trim">Times Square</p></div></div></figure>
+      <figure><p class="cap">8×1 · 역명</p><div class="plate sign-ident"><div class="m m-8"><p class="t-ident trim">Union Square</p></div></div></figure>
+    </div>
+  </section>
+
+  <!-- 3. Color -->
+  <section class="sec">
+    <p class="no">03 · COLOR-005, 009–012, DEC-003, 026, 027</p>
+    <h2>색</h2>
+    <p class="lead">매뉴얼에 숫자 값이 없어서 스캔에서 종이색을 빼고 골랐습니다. 노선색 7개, 그리고 검정·흰색·회색이 있습니다. 작은 빨강 글자는 대비 4.5:1을 맞추려고 조금 어둡게 했습니다.</p>
+    <div class="swatches">
+      <div class="sw" style="background:var(--c-yellow);color:#000"><b>Yellow</b>PMS 130 · #FFCE0E<br>N · 6 · Transfer</div>
+      <div class="sw" style="background:var(--c-orange);color:#fff"><b>Orange</b>PMS 165 · #FF6E10<br>1 · 7 · D · EE</div>
+      <div class="sw" style="background:var(--c-red);color:#fff"><b>Red</b>PMS 185 · #FF4C2B<br>2 · HH · QB · Exit</div>
+      <div class="sw" style="background:var(--c-magenta);color:#fff"><b>Magenta</b>PMS 239 · #FB3998<br>4 · AA · F</div>
+      <div class="sw" style="background:var(--c-green);color:#fff"><b>Green</b>PMS 354 · #01C16C<br>CC · GG · RR · SS</div>
+      <div class="sw" style="background:var(--c-lightblue);color:#fff"><b>Light blue</b>PMS 312 · #02C6F4<br>3 · 8 · E · M</div>
+      <div class="sw" style="background:var(--c-blue);color:#fff"><b>Blue</b>PMS 300 · #0262D3<br>A · KK</div>
+      <div class="sw" style="background:#000;color:#fff;box-shadow:inset 0 0 0 1px var(--fg)"><b>Black</b>#000000<br>5 · B · LL · QJ · 판</div>
+      <div class="sw" style="background:#fff;color:#000;box-shadow:inset 0 0 0 1px var(--fg)"><b>White</b>#FFFFFF<br>판 바탕</div>
+      <div class="sw" style="background:var(--c-grey);color:#fff"><b>Grey</b>#9A9392<br>반전 판 · 비활성</div>
+      <div class="sw" style="background:var(--bg);color:var(--c-red-text);box-shadow:inset 0 0 0 1px var(--fg)"><b>Red text</b>#E72400<br>의무 사인 · 오류</div>
+    </div>
+  </section>
+
+  <!-- 4. Discs -->
+  <section class="sec">
+    <p class="no">04 · DISC-001, 004, 007</p>
+    <h2>노선 원판 26개</h2>
+    <p class="lead">지름은 모듈의 11/12이고, 글자 대문자 높이는 지름의 0.408입니다. 노선마다 글자 위치를 마스터(pdf p.15–40)에서 재서 맞췄습니다. 노란 원판은 검정 글자이고, 다크 모드에서는 검정 원판에 테두리가 생깁니다.</p>
+    <div class="discgrid">
+      <div><span class="disc" data-line="1"><span>1</span></span></div>
+      <div><span class="disc" data-line="2"><span>2</span></span></div>
+      <div><span class="disc" data-line="3"><span>3</span></span></div>
+      <div><span class="disc" data-line="4"><span>4</span></span></div>
+      <div><span class="disc" data-line="5"><span>5</span></span></div>
+      <div><span class="disc" data-line="6"><span>6</span></span></div>
+      <div><span class="disc" data-line="7"><span>7</span></span></div>
+      <div><span class="disc" data-line="8"><span>8</span></span></div>
+      <div><span class="disc" data-line="A"><span>A</span></span></div>
+      <div><span class="disc" data-line="AA"><span>AA</span></span></div>
+      <div><span class="disc" data-line="B"><span>B</span></span></div>
+      <div><span class="disc" data-line="CC"><span>CC</span></span></div>
+      <div><span class="disc" data-line="D"><span>D</span></span></div>
+      <div><span class="disc" data-line="E"><span>E</span></span></div>
+      <div><span class="disc" data-line="EE"><span>EE</span></span></div>
+      <div><span class="disc" data-line="F"><span>F</span></span></div>
+      <div><span class="disc" data-line="GG"><span>GG</span></span></div>
+      <div><span class="disc" data-line="HH"><span>HH</span></span></div>
+      <div><span class="disc" data-line="KK"><span>KK</span></span></div>
+      <div><span class="disc" data-line="LL"><span>LL</span></span></div>
+      <div><span class="disc" data-line="M"><span>M</span></span></div>
+      <div><span class="disc" data-line="N"><span>N</span></span></div>
+      <div><span class="disc" data-line="QB"><span>QB</span></span></div>
+      <div><span class="disc" data-line="QJ"><span>QJ</span></span></div>
+      <div><span class="disc" data-line="RR"><span>RR</span></span></div>
+      <div><span class="disc" data-line="SS"><span>SS</span></span></div>
+    </div>
+    <h3>세 가지 크기</h3>
+    <div class="flexrow" style="align-items:flex-end">
+      <figure style="margin:0"><p class="cap">11″ · 사인</p><span class="disc" data-line="B"><span>B</span></span></figure>
+      <figure style="margin:0"><p class="cap">5½″</p><span class="disc disc--m" data-line="6"><span>6</span></span></figure>
+      <figure style="margin:0"><p class="cap">1 11/16″ · 안내 글 옆</p><span class="disc disc--s" data-line="KK"><span>KK</span></span></figure>
+    </div>
+  </section>
+
+  <!-- 5. Arrows -->
+  <section class="sec">
+    <p class="no">05 · ARROW-001–006</p>
+    <h2>화살표 6방향</h2>
+    <p class="lead">지름 11″ 원 안에 꼭 맞게 들어가는 모양 하나를 돌려 씁니다. 대각선은 위쪽 두 방향만 씁니다(비켜 가기).</p>
+    <div class="arrows">
+      <figure><div class="m m-center"><svg class="arrow" data-dir="up"><use href="#arrow"/></svg></div><figcaption>up</figcaption></figure>
+      <figure><div class="m m-center"><svg class="arrow" data-dir="up-right"><use href="#arrow"/></svg></div><figcaption>up-right</figcaption></figure>
+      <figure><div class="m m-center"><svg class="arrow" data-dir="right"><use href="#arrow"/></svg></div><figcaption>right</figcaption></figure>
+      <figure><div class="m m-center"><svg class="arrow" data-dir="down"><use href="#arrow"/></svg></div><figcaption>down</figcaption></figure>
+      <figure><div class="m m-center"><svg class="arrow" data-dir="left"><use href="#arrow"/></svg></div><figcaption>left</figcaption></figure>
+      <figure><div class="m m-center"><svg class="arrow" data-dir="up-left"><use href="#arrow"/></svg></div><figcaption>up-left</figcaption></figure>
+    </div>
+  </section>
+
+  <!-- 6. Signs -->
+  <section class="sec">
+    <p class="no">06 · SIGN-003–022</p>
+    <h2>사인 조합</h2>
+    <p class="lead">왼쪽에서 오른쪽으로 화살표 → 원판 → 글 순서로 놓습니다. 방향이 둘이면 빈 칸 하나로 나눕니다.</p>
+    <div class="wall">
+      <figure><p class="cap">방향 · 두 방향 사이 빈 칸</p>
+        <div class="plate sign-direction" role="img" aria-label="Straight ahead: EE, N, QB, RR. Right: 2">
+          <div class="m m-center"><svg class="arrow" data-dir="up"><use href="#arrow"/></svg></div>
+          <div class="m m-center"><span class="disc" data-line="EE"><span>EE</span></span></div>
+          <div class="m m-center"><span class="disc" data-line="N"><span>N</span></span></div>
+          <div class="m m-center"><span class="disc" data-line="QB"><span>QB</span></span></div>
+          <div class="m m-center"><span class="disc" data-line="RR"><span>RR</span></span></div>
+          <div class="m m-blank"></div>
+          <div class="m m-center"><svg class="arrow" data-dir="right"><use href="#arrow"/></svg></div>
+          <div class="m m-center"><span class="disc" data-line="2"><span>2</span></span></div>
+        </div></figure>
+      <figure><p class="cap">방향 · 글 두 줄</p>
+        <div class="plate sign-direction">
+          <div class="m m-center"><svg class="arrow" data-dir="up-left"><use href="#arrow"/></svg></div>
+          <div class="m m-4"><p class="t-direction trim">Downtown<br>&amp; Brooklyn</p></div>
+          <div class="m m-center"><span class="disc" data-line="1"><span>1</span></span></div>
+          <div class="m m-center"><span class="disc" data-line="2"><span>2</span></span></div>
+          <div class="m m-center"><span class="disc" data-line="3"><span>3</span></span></div>
+        </div></figure>
+      <figure><p class="cap">Exit(빨강 바탕 흰 글자) · Transfer(노랑 바탕 검정 글자)</p>
+        <div class="plate">
+          <div class="m m-center"><svg class="arrow" data-dir="left"><use href="#arrow"/></svg></div>
+          <div class="m m-exit"><p class="t-ident trim">Exit</p></div>
+          <div class="m m-blank"></div>
+          <div class="m m-center"><svg class="arrow" data-dir="up"><use href="#arrow"/></svg></div>
+          <div class="m m-transfer m-auto"><p class="t-ident trim">Transfer</p></div>
+          <div class="m m-center"><span class="disc" data-line="A"><span>A</span></span></div>
+          <div class="m m-center"><span class="disc" data-line="AA"><span>AA</span></span></div>
+          <div class="m m-center"><span class="disc" data-line="CC"><span>CC</span></span></div>
+          <div class="m m-center"><span class="disc" data-line="E"><span>E</span></span></div>
+        </div></figure>
+      <figure><p class="cap">열차 안내</p>
+        <div class="plate sign-train">
+          <div class="m m-4"><p class="t-direction trim">Uptown</p></div>
+          <div class="m m-center"><span class="disc" data-line="N"><span>N</span></span></div>
+          <div class="m m-center"><span class="disc" data-line="QB"><span>QB</span></span></div>
+          <div class="m m-info"><p class="t-info trim">To 57 St–7 Av</p></div>
+        </div></figure>
+      <div class="flexrow">
+        <figure><p class="cap">안내 2×1 · 글 옆 작은 원판</p>
+          <div class="plate"><div class="m m-2"><div class="stack-g1">
+            <p class="t-info trim">Free transfer</p>
+            <p class="t-info trim">Mon–Fri 7 am to 8:10 pm</p>
+            <p class="t-info trim">Change for <span class="disc disc--inline" data-line="F"><span>F</span></span></p>
+          </div></div></div></figure>
+        <figure><p class="cap">의무 1×1 · 빨강 글자</p>
+          <div class="plate"><div class="m m-mandatory"><div class="stack-g1">
+            <p class="t-info trim">No littering</p><p class="t-info trim">No smoking</p><p class="t-info trim">No spitting</p>
+          </div></div></div></figure>
+        <figure><p class="cap">반전 · 회색 바탕</p>
+          <div class="plate"><div class="m m-2 m-reverse"><p class="t-direction trim">Exit only</p></div></div></figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. Document scale -->
+  <section class="sec doc-demo">
+    <p class="no">07 · DEC-005–016</p>
+    <h2>웹 문서 요소</h2>
+    <p class="lead">매뉴얼에 없는 웹 요소는 사인 비율에서 끌어와 새로 정했습니다(설계결정). 본문 1rem이 안내 글자 크기에 해당합니다.</p>
+
+    <p class="cap">경로 표시</p>
+    <nav aria-label="breadcrumb"><ol class="crumbs">
+      <li><a href="#">All trains</a></li>
+      <li><svg class="arrow" data-dir="right" aria-hidden="true"><use href="#arrow"/></svg></li>
+      <li><a href="#">Uptown &amp; The Bronx</a></li>
+    </ol></nav>
+
+    <p class="cap" style="margin-top:24px">제목 3단계 · 본문 · 링크 · 글 속 원판</p>
+    <h1>Times Square</h1>
+    <h2>Downtown &amp; Brooklyn</h2>
+    <h3>Lower level</h3>
+    <p>Trains stop here at all times. Change for <span class="disc disc--inline" data-line="7"><span>7</span></span> and <span class="disc disc--inline" data-line="N"><span>N</span></span> on the lower level. Read the <a href="#">service notes</a> before travelling. Go <svg class="arrow arrow--inline" data-dir="right" aria-hidden="true"><use href="#arrow"/></svg> to the street.</p>
+
+    <p class="cap" style="margin-top:24px">내비게이션</p>
+    <ul class="nav">
+      <li><a href="#"><svg class="arrow" data-dir="left" aria-hidden="true"><use href="#arrow"/></svg>Back</a></li>
+      <li><a href="#"><svg class="arrow" data-dir="up" aria-hidden="true"><use href="#arrow"/></svg>All trains</a></li>
+      <li><a href="#"><svg class="arrow" data-dir="up-right" aria-hidden="true"><use href="#arrow"/></svg>Bear right</a></li>
+    </ul>
+
+    <div class="two" style="margin-top:var(--doc-space-4)">
+      <div>
+        <p class="cap">버튼 · 기본 / 눌림 / 비활성 (DEC-007, 대안 검토 중)</p>
+        <button type="button">Search</button>
+        <button type="button" aria-pressed="true">Pressed</button>
+        <button type="button" disabled>Disabled</button>
+
+        <p class="cap" style="margin-top:24px">입력 · 오류 · 비활성</p>
+        <form>
+          <label for="from">From</label><input id="from" value="57 St–7 Av">
+          <label for="to" style="margin-top:16px">To</label><input id="to" value="Avenue Q" aria-invalid="true">
+          <p class="error" style="margin-top:8px">Station not found</p>
+          <label for="via" style="margin-top:16px">Via</label>
+          <select id="via"><option>Any route</option><option>Express only</option></select>
+          <label for="off" style="margin-top:16px">Fare</label><input id="off" value="Fixed" disabled>
+        </form>
+      </div>
+      <div>
+        <p class="cap">작은 메뉴 (모바일)</p>
+        <div class="compact">
+          <div class="compact__title">Times Square</div>
+          <div class="compact__item">Downtown &amp; Brooklyn</div>
+          <div class="compact__item">Mon–Fri 7 am to 8:10 pm</div>
+        </div>
+        <p class="cap" style="margin-top:24px">임시 공지</p>
+        <p class="notice">Temporary: weekend service changes.</p>
+      </div>
+    </div>
+
+    <p class="cap" style="margin-top:var(--doc-space-4)">표 (Directory)</p>
+    <table><thead><tr><th>Destination</th><th>How to get there</th></tr></thead>
+      <tbody>
+        <tr><td>Avenue M</td><td><span class="disc disc--inline" data-line="D"><span>D</span></span></td></tr>
+        <tr><td>Union Sq</td><td><span class="disc disc--inline" data-line="4"><span>4</span></span> <span class="disc disc--inline" data-line="5"><span>5</span></span> <span class="disc disc--inline" data-line="6"><span>6</span></span></td></tr>
+        <tr><td>Coney Island</td><td><span class="disc disc--inline" data-line="B"><span>B</span></span> <span class="disc disc--inline" data-line="F"><span>F</span></span> <span class="disc disc--inline" data-line="N"><span>N</span></span></td></tr>
+      </tbody></table>
+  </section>
+</main>
+</body>
+</html>
