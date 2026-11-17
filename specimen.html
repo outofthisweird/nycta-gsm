@@ -276,6 +276,48 @@
         <tr><td>Coney Island</td><td><span class="disc disc--inline" data-line="B"><span>B</span></span> <span class="disc disc--inline" data-line="F"><span>F</span></span> <span class="disc disc--inline" data-line="N"><span>N</span></span></td></tr>
       </tbody></table>
   </section>
+  <!-- 8. Information popup -->
+  <section class="sec doc-demo">
+    <p class="no">08 · DEC-031</p>
+    <h2>안내 팝업</h2>
+    <p class="lead">나중 시기 MTA 검정 안내판을 바탕으로, 페이지와 반대 색의 판에 안내 크기 글자를 Grid 1 간격으로 놓았습니다. 위에 ½″ 띠와 ⅛″ 선, 선에서 첫 대문자 선까지 ½″. 앞 원판은 첫 줄 대문자 선부터 둘째 줄 기준선까지 걸칩니다. 다크 모드에서는 흰 판에 검정 글자가 됩니다.</p>
+    <div class="flexrow">
+<div class="popup" role="dialog" aria-labelledby="sp-a-t">
+  <div class="popup__body">
+    <span class="disc popup__disc" data-line="3" role="img" aria-label="3 train"><span>3</span></span>
+    <div class="popup__text">
+      <p id="sp-a-t">To Harlem–148 St</p>
+      <p>Late nights take <span class="disc disc--inline" data-line="2"><span>2</span></span> to</p>
+      <p>Times Sq–42 St for <span class="disc disc--inline" data-line="3"><span>3</span></span></p>
+      <form method="dialog"><button class="popup__close">Close</button></form>
+    </div>
+  </div>
+</div>
+<div class="popup" role="dialog" style="--popup-fs: 1.5rem" aria-labelledby="sp-b-t">
+  <div class="popup__body">
+    <div class="popup__text">
+      <p id="sp-b-t">Weekend service change</p>
+      <p>No <span class="disc disc--inline" data-line="B"><span>B</span></span> trains between</p>
+      <p>Dekalb Av and Brighton Beach</p>
+      <p>Take the <span class="disc disc--inline" data-line="D"><span>D</span></span> instead</p>
+      <form method="dialog"><button class="popup__close">Close</button></form>
+    </div>
+  </div>
+</div>
+    </div>
+    <p style="margin-top:var(--doc-space-3)"><a href="#" onclick="document.getElementById('sp-m').showModal(); return false;">Open the popup</a></p>
+<dialog class="popup" id="sp-m" aria-labelledby="sp-m-t" autofocus>
+  <div class="popup__body">
+    <span class="disc popup__disc" data-line="3" role="img" aria-label="3 train"><span>3</span></span>
+    <div class="popup__text">
+      <p id="sp-m-t">To Harlem–148 St</p>
+      <p>Late nights take <span class="disc disc--inline" data-line="2"><span>2</span></span> to</p>
+      <p>Times Sq–42 St for <span class="disc disc--inline" data-line="3"><span>3</span></span></p>
+      <form method="dialog"><button class="popup__close">Close</button></form>
+    </div>
+  </div>
+</dialog>
+  </section>
 </main>
 </body>
 </html>

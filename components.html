@@ -104,6 +104,45 @@
   </section>
 
   <section class="demo">
+    <p class="cap">Information popup (DEC-031) · in place, and as a modal dialog</p>
+    <div style="display:flex; flex-wrap:wrap; gap:24px; align-items:flex-start">
+<div class="popup" role="dialog" aria-labelledby="pop-a-t">
+  <div class="popup__body">
+    <span class="disc popup__disc" data-line="3" role="img" aria-label="3 train"><span>3</span></span>
+    <div class="popup__text">
+      <p id="pop-a-t">To Harlem–148 St</p>
+      <p>Late nights take <span class="disc disc--inline" data-line="2"><span>2</span></span> to</p>
+      <p>Times Sq–42 St for <span class="disc disc--inline" data-line="3"><span>3</span></span></p>
+      <form method="dialog"><button class="popup__close">Close</button></form>
+    </div>
+  </div>
+</div>
+<div class="popup" role="dialog" style="--popup-fs: 1.5rem" aria-labelledby="pop-b-t">
+  <div class="popup__body">
+    <div class="popup__text">
+      <p id="pop-b-t">Weekend service change</p>
+      <p>No <span class="disc disc--inline" data-line="B"><span>B</span></span> trains between</p>
+      <p>Dekalb Av and Brighton Beach</p>
+      <p>Take the <span class="disc disc--inline" data-line="D"><span>D</span></span> instead</p>
+      <form method="dialog"><button class="popup__close">Close</button></form>
+    </div>
+  </div>
+</div>
+    </div>
+    <p style="margin-top:var(--doc-space-3)"><a href="#" onclick="document.getElementById('pop-m').showModal(); return false;">Open the popup</a></p>
+<dialog class="popup" id="pop-m" aria-labelledby="pop-m-t" autofocus>
+  <div class="popup__body">
+    <span class="disc popup__disc" data-line="3" role="img" aria-label="3 train"><span>3</span></span>
+    <div class="popup__text">
+      <p id="pop-m-t">To Harlem–148 St</p>
+      <p>Late nights take <span class="disc disc--inline" data-line="2"><span>2</span></span> to</p>
+      <p>Times Sq–42 St for <span class="disc disc--inline" data-line="3"><span>3</span></span></p>
+      <form method="dialog"><button class="popup__close">Close</button></form>
+    </div>
+  </div>
+</dialog>
+  </section>
+  <section class="demo">
     <p class="cap">Document scale (DEC-005 … DEC-016)</p>
     <nav aria-label="breadcrumb"><ol class="crumbs">
       <li><a href="#">All trains</a></li>

@@ -25,7 +25,8 @@
 :root {
   /* --- typeface --- */
   --font-sign: "Albert Sans NYCTA", system-ui, sans-serif; /* DEC-017, DEC-024 | - | [설계결정] substitute for TYPE-001 Standard Medium */
-  --font-weight: 600;                                   /* DEC-017 | - | [설계결정] Medium equivalent (TYPE-002) */
+  --font-weight-light: 600;                             /* DEC-017 | - | [설계결정] Medium equivalent (TYPE-002), dark type on white */
+  --font-weight: var(--font-weight-light);              /* DEC-017, DEC-019 | - | [설계결정] current page weight (dark mode swaps it) */
   --font-weight-dark: 560;                              /* DEC-019 | - | [설계결정] irradiation compensation */
   --cap-em: 0.700;                                      /* DEC-017 | - | [변환] Albert Sans capHeight 700 / UPM 1000 */
   --ls: 0em;                                            /* DEC-024 | pdf p.13 | [변환] spacing now comes from the chart kerning in the font */
@@ -472,3 +473,69 @@ td { padding: var(--doc-space-1); border-bottom: var(--doc-rule) solid var(--fg)
   border-top: var(--doc-rule) solid var(--fg);
   padding: var(--doc-space-1) 0;
 }
+
+/* -------------------------------------------------------------------------
+   12. Component — information popup (DEC-031)
+   Markup: <dialog class="popup"> <div class="popup__body">
+             [<span class="disc popup__disc" data-line="3"><span>3</span></span>]
+             <div class="popup__text"> <p>…</p> <p>… <span class="disc disc--inline">…</span></p>
+               <form method="dialog"><button class="popup__close">Close</button></form> </div>
+           </div></dialog>       (a <div class="popup" role="dialog"> renders the same in place)
+   ------------------------------------------------------------------------- */
+.popup {
+  --p-fs: var(--popup-fs, var(--doc-fs-s));            /* DEC-031 | - | [설계결정] Information tier 1rem; --popup-fs scales the whole popup */
+  --p-in: calc(var(--p-fs) * var(--cap-em) / 1.375);   /* DEC-031, DEC-002 | - | [변환] cap = 1 3/8in */
+  --p-rule: max(1px, calc(var(--p-in) * 0.125));        /* DEC-031, SIGN-023 | pdf p.88 | [변환] 1/8in rule */
+  --font-weight: var(--font-weight-dark);               /* DEC-031, DEC-019 | - | [설계결정] white type → irradiation weight */
+  color: var(--bg);                                     /* DEC-031, SIGN-016 | pdf p.82 | [설계결정] reverse of the page */
+  background:
+    linear-gradient(var(--bg), var(--bg)) 0 calc(var(--p-in) * 0.5) / 100% var(--p-rule) no-repeat, /* DEC-031 | - | [설계결정] rule ½in below the top edge */
+    var(--fg);
+  font-size: var(--p-fs);                               /* DEC-031, TYPE-007 | - | [설계결정] */
+  font-weight: var(--font-weight);
+  line-height: var(--lh-g1);                            /* GRID-007 | pdf p.11 | [변환] */
+  border: 0;
+  margin: auto;                                         /* DEC-031 | - | [설계결정] centred when modal */
+  padding: calc(var(--p-in) * 1.125) calc(var(--p-in) * 0.5) calc(var(--p-in) * (0.5 + 0.235 * 1.375)); /* DEC-031, GRID-003, GRID-011 | - | [설계결정] top ½ + ⅛ + ½in; sides ½in; bottom ½in below the descender guide (0.235 cap) */
+  width: max-content;
+  max-inline-size: min(calc(var(--p-in) * 48), calc(100% - 2 * var(--doc-space-3))); /* DEC-031 | - | [설계결정] ≤ 4 ft */
+  max-block-size: calc(100% - 2 * var(--doc-space-3));
+  overflow: auto;
+  box-shadow: none;
+}
+.popup:not(dialog), dialog.popup[open] { display: block; }
+.popup::backdrop { background: rgb(255 255 255 / 0.8); } /* DEC-031 | - | [설계결정] page colour at 80% */
+.popup__body { display: flex; align-items: flex-start; gap: calc(var(--p-in) * 0.5); } /* GRID-009 | pdf p.11 | [이미지판독] disc → text ½in */
+.disc.popup__disc { --d: calc(var(--p-in) * (1.375 + 1.875)); } /* DEC-031, GRID-010 | - | [설계결정] cap line 1 → baseline 2 = 3 1/4in */
+.popup__text { min-width: 0; }
+.popup__text > * {                                      /* GRID-007, TYPE-012 | pdf p.8,11 | [변환] Grid 1 lines, trimmed to cap line / baseline */
+  --p-trim: calc((var(--trim-k) - var(--lh-g1) / 2) * 1em); /* GRID-003 | - | [변환] same as .trim fallback */
+  font-size: inherit;
+  line-height: var(--lh-g1);
+  margin: var(--p-trim) 0 var(--p-trim) calc(-1 * var(--lsb-comp)); /* DEC-025 | - | [변환] first glyph on the ½in margin */
+}
+.popup__text > * + * { margin-block-start: calc(var(--p-in) * 0.5 + var(--p-trim)); } /* GRID-007 | pdf p.11 | [이미지판독] baseline → next cap line ½in */
+@supports (text-box: trim-both cap alphabetic) {
+  .popup__text > * { --p-trim: 0px; text-box: trim-both cap alphabetic; }
+}
+.popup .popup__close {                                  /* DEC-031, DEC-006 | - | [설계결정] text control styled as a link, not DEC-007 */
+  appearance: none;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  line-height: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: var(--p-rule);
+  text-underline-offset: 0.18em;
+  cursor: pointer;
+}
+/* black discs on the black field get the dark-mode ring — DEC-019, DEC-031 | - | [설계결정] */
+.popup .disc:is([data-line="5"],[data-line="B"],[data-line="LL"],[data-line="QJ"]) { box-shadow: 0 0 0 1px var(--bg); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .popup { --font-weight: var(--font-weight-light); } /* DEC-031 | - | [설계결정] black type on white */
+  :root:not([data-theme="light"]) .popup::backdrop { background: rgb(0 0 0 / 0.8); }
+}
+:root[data-theme="dark"] .popup { --font-weight: var(--font-weight-light); }
+:root[data-theme="dark"] .popup::backdrop { background: rgb(0 0 0 / 0.8); }
