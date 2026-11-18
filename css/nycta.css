@@ -302,15 +302,25 @@ p { margin: 0 0 var(--doc-space-3); }
 }
 .disc--m { --d: var(--disc-m); }                        /* DISC-001 | pdf p.14 | [이미지판독] 5½in */
 .disc--s { --d: var(--disc-s); }                        /* DISC-001 | pdf p.14 | [이미지판독] 1 11/16in */
-.disc--inline {                                         /* GRID-008, GRID-010 | pdf p.11 | [이미지판독] beside info text */
+.disc--inline {                                         /* GRID-008, DEC-034 | pdf p.11 | [설계결정] beside text, no minimum size */
   /* D = parent cap × (1 11/16 ÷ 1 3/8); glyph cap = 0.408 D.
      font-size uses parent em: k = 0.408 × 1.6875 / 1.375 = 0.5007  [변환] */
   font-size: calc(1em * var(--disc-glyph) * 1.6875 / 1.375);
-  --d: max(20px, calc(1em * var(--cap-em) / var(--disc-glyph)));   /* own em → D; 20px floor = DEC-021 [설계결정] legibility */
-  /* GRID-010 (disc top = cap line) holds at sign scale; at document scale the 20px floor makes the disc taller,
-     so it is centred on the line and its overhang is cancelled to keep line spacing even — DEC-021 [설계결정] */
-  vertical-align: middle;
-  margin-block: -0.6em;
+  --d: calc(1em * var(--cap-em) / var(--disc-glyph));   /* GRID-008 | pdf p.11 | [변환] own em → D */
+  --disc-mb: 0.3;                                       /* DEC-034 | - | [설계결정] overhang never changes line spacing */
+  margin-block: calc(var(--d) * -1 * var(--disc-mb));
+  /* Centre on the cap height (DEC-034), from geometry only (no font metrics, which the browser rounds):
+     the glyph is out of flow, so the disc's baseline is its bottom margin edge, D × (0.5 − mb) below its centre.
+     Raise = parent cap / 2 − D × (0.5 − mb), parent cap = D × 1.375 / 1.6875  [변환] */
+  vertical-align: calc(var(--d) * (1.375 / 1.6875 / 2 - 0.5 + var(--disc-mb)));
+  position: relative;
+  will-change: transform;                               /* DEC-034 | - | [설계결정] circle and glyph snap together (one layer) */
+}
+.disc--inline > span {                                  /* DISC-007, DEC-034 | - | [변환] centred like the grid item, out of flow */
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) translate(var(--disc-tx, 0em), var(--disc-ty, 0em));
 }
 
 /* line → color (COLOR-003 | pdf p.15–40 | [확정]; hex DEC-003) */
