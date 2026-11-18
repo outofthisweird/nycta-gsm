@@ -21,7 +21,13 @@
    by included); a name that would touch another stretch of line or another name moves to the nearest free side.
    At a transfer where one group's circle is left out (it would touch the other group's), that group's line is
    drawn over the other bundle up to the circle, so the station reads as shared. "grid": true draws the grid
-   underneath (for checking alignment). */
+   underneath (for checking alignment).
+   Other renderers (eee-map's interactive map) use the same geometry instead of copying the rules:
+     NYCTAMap.geometry = { version, SIDES, offset(i, n, pitch), bundleRadius(radius, pitch, n),
+       runOn(pts, ext, atStart, atEnd), strand(pts, d, R0) → path model { segs, total, d, at, len, curved },
+       pointAt(model, s) → [x, y, angle], subPath(model, from, to, back), samples(model, hw, step),
+       blocked(box, samples, nameBoxes, gap), sidesFrom(side) }
+   Bump geometry.version when a function's inputs or outputs change. */
 (function () {
   'use strict';
   var NS = 'http://www.w3.org/2000/svg';
@@ -59,11 +65,34 @@
   var f = function (v) { return Math.round(v * 100) / 100; };
   var pt = function (p) { return f(p[0]) + ' ' + f(p[1]); };
 
-  /* One strand: the centre path shifted by d (positive = right of travel on screen), each turn filleted with
-     r = R0 − turn·d so every strand of a bundle bends round the same centre. Turns keep the full radius; arcs
-     are shortened only where two neighbouring turns (or a turn and a path end) leave too little room.
-     Returns the SVG path, where each path point ended up, and which points the curve covers (a point on a
-     corner, or on a straight so close to a corner that the arc starts before it). */
+  /* ---------------------------------------------------------------------------------------------------------
+     Geometry core, shared with other renderers through NYCTAMap.geometry (eee-map draws its own interactive
+     map with it). Pure functions on plain [x, y] points in px, y down; no DOM. Change the rules here once.
+     --------------------------------------------------------------------------------------------------------- */
+
+  /* Strand offset of series i of n in a bundle (positive = right of travel), and the bundle's centre-line bend
+     radius: innermost strand `radius`, one pitch more per strand outward (DEC-036). */
+  function offset(i, n, pitch) { return (i - (n - 1) / 2) * pitch; }
+  function bundleRadius(radius, pitch, n) { return radius + (n - 1) / 2 * pitch; }
+
+  /* A series that ends at an article runs on past it by `ext` (half the strand width), so the end circle keeps
+     the same margin at the end as at the sides. Returns new points; shift = 1 when one was added in front. */
+  function runOn(pts, ext, atStart, atEnd) {
+    var out = pts.slice(), n = pts.length;
+    if (n > 1 && atEnd) out.push(add(pts[n - 1], mul(unit(sub(pts[n - 1], pts[n - 2])), ext)));
+    if (n > 1 && atStart) out.unshift(add(pts[0], mul(unit(sub(pts[0], pts[1])), ext)));
+    return { pts: out, shift: n > 1 && atStart ? 1 : 0 };
+  }
+
+  /* One strand: the centre path shifted by d, each turn filleted with r = R0 − turn·d so every strand of a bundle
+     bends round the same centre. Turns keep the full radius (the inside of a bend is never square); arcs are
+     shortened only where two neighbouring turns (or a turn and a path end) leave too little room.
+     Returns a path model:
+       segs   [{t:'L', a, b, len, s0} | {t:'A', a, b, c, r, a0, sg, len, s0}]   (s0 = length along the path)
+       total  path length;  d  SVG path
+       at[j]  where point j is drawn;  len[j]  how far along the path it is
+       curved[j]  true when point j is a corner or lies where an arc has replaced the straight: an article there
+                  is a data error (DEC-036), its circle is drawn on the curve */
   function strand(pts, d, R0) {
     var n = pts.length, u = [], nn = [];
     for (var i = 0; i < n - 1; i++) { u[i] = unit(sub(pts[i + 1], pts[i])); nn[i] = [-u[i][1], u[i][0]]; }
@@ -84,7 +113,7 @@
       var theta = Math.acos(Math.max(-1, Math.min(1, dot(u[b - 1], u[b]))));
       var turn = c > 0 ? 1 : -1, r = Math.max(0, R0 - turn * d);
       if (r < 0.01 || theta > Math.PI - 1e-3) continue; // radius 0 (or a U-turn): turns on the point
-      bend[b] = { turn: turn, tan: Math.tan(theta / 2), r: r, t: r * Math.tan(theta / 2) };
+      bend[b] = { turn: turn, theta: theta, tan: Math.tan(theta / 2), r: r, t: r * Math.tan(theta / 2) };
     }
     turns.push(n - 1);
     for (var k = 0; k < turns.length - 1; k++) {
@@ -102,27 +131,105 @@
       bv.a = sub(q[v], mul(u[v - 1], bv.t));
       bv.e = add(q[v], mul(u[v], bv.t));
       bv.c = add(bv.a, mul(nn[v - 1], bv.turn * bv.r));
+      bv.a0 = Math.atan2(bv.a[1] - bv.c[1], bv.a[0] - bv.c[0]);
+      bv.sg = bv.turn > 0 ? 1 : -1;                  // screen angles grow clockwise (y down) = SVG sweep 1
     });
-    var onArc = function (bv, p) { return add(bv.c, mul(unit(sub(p, bv.c)), bv.r)); };
 
-    var dstr = 'M' + pt(q[0]), at = [q[0]], curved = [], seg = 0;
+    var segs = [], total = 0, cur = q[0], at = [q[0]], lens = [0], curved = [], seg = 0;
+    var line = function (p) { var l = len(sub(p, cur)); if (l > 1e-6) { segs.push({ t: 'L', a: cur, b: p, len: l, s0: total }); total += l; } cur = p; };
+    var onArc = function (bv, p) {                     // nearest point of the arc, and its length along the path
+      var ang = Math.atan2(p[1] - bv.c[1], p[0] - bv.c[0]), da = Math.atan2(Math.sin(ang - bv.a0), Math.cos(ang - bv.a0)) * bv.sg;
+      da = Math.max(0, Math.min(bv.theta, da));
+      var m = bv.a0 + bv.sg * da;
+      return { p: [bv.c[0] + bv.r * Math.cos(m), bv.c[1] + bv.r * Math.sin(m)], s: bv.s0 + bv.r * da };
+    };
     for (var v = 1; v < n; v++) {
       while (turns[seg + 1] < v) seg++;              // turns[seg] < v <= turns[seg + 1]
       var bv = bend[v];
       if (bv) {
-        dstr += 'L' + pt(bv.a) + 'A' + f(bv.r) + ' ' + f(bv.r) + ' 0 0 ' + (bv.turn > 0 ? 1 : 0) + ' ' + pt(bv.e);
-        at[v] = onArc(bv, q[v]); curved[v] = true;
+        line(bv.a);
+        bv.s0 = total;
+        segs.push({ t: 'A', a: bv.a, b: bv.e, c: bv.c, r: bv.r, a0: bv.a0, sg: bv.sg, len: bv.r * bv.theta, s0: total });
+        total += bv.r * bv.theta; cur = bv.e;
+        var mid = onArc(bv, add(bv.c, mul(unit(sub(q[v], bv.c)), bv.r)));
+        at[v] = mid.p; lens[v] = mid.s; curved[v] = true;
         continue;
       }
       if (turns[seg + 1] !== v) {                   // on a straight: a neighbouring arc may already cover it
         var prev = bend[turns[seg]], next = bend[turns[seg + 1]], cov = null;
         if (prev && len(sub(q[v], q[turns[seg]])) < prev.t - 1e-6) cov = prev;
         if (next && len(sub(q[v], q[turns[seg + 1]])) < next.t - 1e-6) cov = next;
-        if (cov) { at[v] = onArc(cov, q[v]); curved[v] = true; continue; }
+        if (cov) { at[v] = q[v]; curved[v] = cov; continue; }   // placed on the arc once its length is known
       }
-      at[v] = q[v]; dstr += 'L' + pt(q[v]);
+      line(q[v]); at[v] = q[v]; lens[v] = total;
     }
-    return { d: dstr, at: at, curved: curved };
+    for (var w = 1; w < n; w++) if (curved[w] && curved[w] !== true) {
+      var o = onArc(curved[w], q[w]); at[w] = o.p; lens[w] = o.s; curved[w] = true;
+    }
+    var model = { segs: segs, total: total, at: at, len: lens, curved: curved };
+    model.d = subPath(model, 0, total);
+    return model;
+  }
+
+  /* Point at length s along a path model: [x, y, direction in radians]. */
+  function pointAt(model, s) {
+    var segs = model.segs;
+    if (!segs.length) return [model.at[0][0], model.at[0][1], 0];
+    s = Math.max(0, Math.min(model.total, s));
+    for (var i = 0; i < segs.length; i++) {
+      var g = segs[i];
+      if (s <= g.s0 + g.len + 1e-9 || i === segs.length - 1) {
+        var t = Math.max(0, Math.min(g.len, s - g.s0));
+        if (g.t === 'L') {
+          var k = g.len ? t / g.len : 0;
+          return [g.a[0] + (g.b[0] - g.a[0]) * k, g.a[1] + (g.b[1] - g.a[1]) * k, Math.atan2(g.b[1] - g.a[1], g.b[0] - g.a[0])];
+        }
+        var m = g.a0 + g.sg * t / g.r;
+        return [g.c[0] + g.r * Math.cos(m), g.c[1] + g.r * Math.sin(m), m + g.sg * Math.PI / 2];
+      }
+    }
+  }
+
+  /* SVG path of the stretch [from, to] of a path model (drawn to → from when back): for growth animations. */
+  function subPath(model, from, to, back) {
+    var parts = [];
+    model.segs.forEach(function (g) {
+      var a = Math.max(from, g.s0), b = Math.min(to, g.s0 + g.len);
+      if (b - a > 1e-6) parts.push({ g: g, p: pointAt(model, a), q: pointAt(model, b) });
+    });
+    if (!parts.length) { var z = pointAt(model, from); return 'M' + pt(z); }
+    if (back) parts.reverse();
+    var dstr = 'M' + pt(back ? parts[0].q : parts[0].p);
+    parts.forEach(function (x) {
+      var e = back ? x.p : x.q;
+      dstr += x.g.t === 'L' ? 'L' + pt(e) : 'A' + f(x.g.r) + ' ' + f(x.g.r) + ' 0 0 ' + ((x.g.sg > 0) !== !!back ? 1 : 0) + ' ' + pt(e);
+    });
+    return dstr;
+  }
+
+  /* Points every `step` px along a path model, each standing for a disc of half width hw. The ends are butt-cut,
+     so sampling stops one half width short of them. For checking names against the lines. */
+  function samples(model, hw, step) {
+    var out = [], e = Math.min(hw, model.total / 2);
+    for (var s = e; s <= model.total - e + 1e-6; s += step || 2) { var p = pointAt(model, s); out.push([p[0], p[1], hw]); }
+    return out;
+  }
+
+  /* Is a name box [x0, y0, x1, y1] closer than `gap` to any line sample or other name box? Name boxes are cap
+     boxes (cap line to last baseline; descenders ignored, as the ½in clearance is measured on caps). */
+  function blocked(box, lineSamples, nameBoxes, gap) {
+    for (var i = 0; i < lineSamples.length; i++) {
+      var s = lineSamples[i], dx = Math.max(box[0] - s[0], 0, s[0] - box[2]), dy = Math.max(box[1] - s[1], 0, s[1] - box[3]);
+      if (Math.hypot(dx, dy) < s[2] + gap - 1.5) return true;
+    }
+    return (nameBoxes || []).some(function (o) { var e = gap / 2; return box[0] < o[2] + e && box[2] > o[0] - e && box[1] < o[3] + e && box[3] > o[1] - e; });
+  }
+
+  /* The eight sides, the asked one first, then by angle from it: the order to try when a name is blocked. */
+  function sidesFrom(want) {
+    var ang = function (k) { return Math.atan2(SIDES[k][1], SIDES[k][0]); }, w = SIDES[want] ? want : 'e';
+    var dif = function (k) { return Math.abs(Math.atan2(Math.sin(ang(k) - ang(w)), Math.cos(ang(k) - ang(w)))); };
+    return Object.keys(SIDES).sort(function (k1, k2) { return dif(k1) - dif(k2); });
   }
 
   function draw(host) {
@@ -161,7 +268,7 @@
     order.forEach(function (gid) {
       var list = members[gid];
       if (!list) return;
-      var nG = list.length, R0 = R + (nG - 1) / 2 * P;
+      var nG = list.length, R0 = bundleRadius(R, P, nG);
       var col = colour((groups[gid] || {}).color || 'black');
       var gEl = el('g', { class: 'map__group', 'data-group': gid, style: '--line:' + col }, gLines);
       var casings = el('g', { class: 'map__casings' }, gEl);
@@ -175,16 +282,10 @@
           if (pts.length && len(sub(q, pts[pts.length - 1])) < 1e-6) { if (typeof p === 'string') ids[ids.length - 1] = p; return; }
           pts.push(q); ids.push(typeof p === 'string' ? p : null);
         });
-        /* A series that ends at an article runs on past it by half the strand width, so the terminal circle sits
-           inside the strand with the same margin at the end as at the sides (DEC-036). */
-        var ext = (P - gap) / 2, last = pts.length - 1;
-        if (last > 0 && ids[last]) {
-          pts.push(add(pts[last], mul(unit(sub(pts[last], pts[last - 1])), ext))); ids.push(null);
-        }
-        if (last > 0 && ids[0]) {
-          pts.unshift(add(pts[0], mul(unit(sub(pts[0], pts[1])), ext))); ids.unshift(null);
-        }
-        var d = (i - (nG - 1) / 2) * P, s = strand(pts, d, R0);
+        var ro = runOn(pts, (P - gap) / 2, !!ids[0], !!ids[ids.length - 1]);
+        if (ro.pts.length > pts.length) { if (ro.shift) ids.unshift(null); if (ro.pts.length - ro.shift > pts.length) ids.push(null); }
+        pts = ro.pts;
+        var d = offset(i, nG, P), s = strand(pts, d, R0);
         ids.forEach(function (aid, j) {
           if (aid && s.curved[j]) warn(sr.id + ' ' + aid, 'article "' + aid + '" sits on a bend of series "' + sr.id +
             '"; put the bend on a bare point [x, y] between articles, at least one bend length away');
@@ -282,20 +383,9 @@
 
     /* Names. Every stretch of line is sampled (arcs included) so a name can be checked against all of it,
        not only against the strands at its own article. */
-    var samples = [];
-    gLines.querySelectorAll('.map__line').forEach(function (p) {
-      // each sample stands for a disc of the stroke's half width; the ends are butt-cut, so stop one half width short
-      var hw = parseFloat(p.getAttribute('stroke-width')) / 2, T = p.getTotalLength();
-      for (var l = Math.min(hw, T / 2); l <= T - Math.min(hw, T / 2) + 1e-6; l += 2) { var q = p.getPointAtLength(l); samples.push([q.x, q.y, hw]); }
-    });
+    var lineSamples = [];
+    drawn.forEach(function (sd) { lineSamples = lineSamples.concat(samples(sd.s, (P - gap) / 2, 2)); });
     var boxes = [];
-    function blocked(r) {
-      for (var i = 0; i < samples.length; i++) {
-        var s = samples[i], dx = Math.max(r[0] - s[0], 0, s[0] - r[2]), dy = Math.max(r[1] - s[1], 0, s[1] - r[3]);
-        if (Math.hypot(dx, dy) < s[2] + lgap - 1.5) return true;
-      }
-      return boxes.some(function (o) { var e = lgap / 2; return r[0] < o[2] + e && r[2] > o[0] - e && r[1] < o[3] + e && r[3] > o[1] - e; });
-    }
     function place(nm, key) {
       var ar = nm.ar, S = nm.S, side = SIDES[key];
       // clear every strand at the article (stopping or passing), per axis
@@ -323,18 +413,11 @@
       var bb = t.getBBox();
       return { node: node === gNames ? t : node, rect: [bb.x, y0 - cap, bb.x + bb.width, y0 + (k - 1) * lh] };
     }
-    var angle = function (k) { return Math.atan2(SIDES[k][1], SIDES[k][0]); };
     names.forEach(function (nm) {
-      var want = SIDES[nm.ar.side] ? nm.ar.side : 'e';
-      var keys = Object.keys(SIDES).sort(function (k1, k2) {
-        var d1 = Math.abs(Math.atan2(Math.sin(angle(k1) - angle(want)), Math.cos(angle(k1) - angle(want))));
-        var d2 = Math.abs(Math.atan2(Math.sin(angle(k2) - angle(want)), Math.cos(angle(k2) - angle(want))));
-        return d1 - d2;
-      });
-      var got = null;
+      var want = SIDES[nm.ar.side] ? nm.ar.side : 'e', keys = sidesFrom(want), got = null;
       for (var i = 0; i < keys.length && !got; i++) {
         var tryIt = place(nm, keys[i]);
-        if (!blocked(tryIt.rect)) got = tryIt; else tryIt.node.remove();
+        if (!blocked(tryIt.rect, lineSamples, boxes, lgap)) got = tryIt; else tryIt.node.remove();
       }
       if (!got) { got = place(nm, want); warn('name ' + nm.id, 'name of "' + nm.id + '" touches a line or a name on every side'); }
       boxes.push(got.rect);
@@ -359,7 +442,11 @@
       try { draw(maps[i]); } catch (e) { console.error(e); }
     }
   }
-  window.NYCTAMap = { draw: draw, redraw: run };
+  window.NYCTAMap = {
+    draw: draw, redraw: run,
+    geometry: { version: 1, SIDES: SIDES, offset: offset, bundleRadius: bundleRadius, runOn: runOn, strand: strand,
+                pointAt: pointAt, subPath: subPath, samples: samples, blocked: blocked, sidesFrom: sidesFrom }
+  };
   function start() { (document.fonts ? document.fonts.ready : Promise.resolve()).then(run); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
   if (document.fonts) document.fonts.addEventListener('loadingdone', run);
