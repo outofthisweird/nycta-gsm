@@ -595,3 +595,36 @@ td { padding: var(--doc-space-1); border-bottom: var(--doc-rule) solid var(--fg)
 }
 :root[data-theme="dark"] .popup { --font-weight: var(--font-weight-light); }
 :root[data-theme="dark"] .popup::backdrop { background: rgb(0 0 0 / 0.8); }
+
+/* -------------------------------------------------------------------------
+   13. Component — route map (DEC-036)
+   Markup: <figure class="map" aria-label="…"><script type="application/json">{ groups, stations, lines }</script></figure>
+   + js/nycta-map.js (draws the SVG). Data format: see the head of js/nycta-map.js.
+   ------------------------------------------------------------------------- */
+.map {
+  --map-fs: var(--doc-fs-s);                            /* DEC-036, DEC-005 | - | [설계결정] station names = Information tier */
+  --map-cap: calc(var(--map-fs) * var(--cap-em));       /* DEC-036 | - | [변환] name cap height */
+  --map-pitch: calc(var(--map-cap) * 2);                /* DEC-036 | - | [설계결정] strand pitch = 2 cap (reference photo ≈1.9–2.2) */
+  --map-gap: calc(var(--doc-in) * 0.25);                /* DEC-036, SIGN-023 | - | [설계결정] ground between strands = 2 × ⅛in rule */
+  --map-stop: calc(var(--map-cap) * 1.6875 / 1.375);    /* DEC-036, GRID-008, DISC-001 | pdf p.11,14 | [변환] station = small disc beside a name of that cap */
+  --map-label-gap: calc(var(--doc-in) * 0.5);           /* DEC-036, GRID-009 | pdf p.11 | [변환] strand edge → name ½in */
+  --map-radius: 1;                                      /* DEC-036 | - | [설계결정] innermost strand bend radius, in pitches; +1 pitch per strand outward */
+  --map-unit: 2;                                        /* DEC-036 | - | [설계결정] grid step, in pitches */
+  margin: 0;
+  overflow-x: auto;                                     /* DEC-036 | - | [설계결정] the map keeps its scale; narrow screens pan */
+  font-size: var(--map-fs);
+}
+.map__svg { display: block; max-width: none; overflow: visible; }
+.map__casing { fill: none; stroke: var(--bg); stroke-linecap: butt; stroke-linejoin: round; } /* DEC-036 | - | [설계결정] ground cut where lines cross */
+.map__line { fill: none; stroke: var(--line); stroke-linecap: butt; stroke-linejoin: round; } /* DEC-036, COLOR-003 | - | [설계결정] route colour */
+.map__stop { fill: var(--c-black); }                    /* DEC-036 | - | [설계결정] station = plain black circle, no letter */
+.map__transfer { fill: none; stroke: var(--fg); stroke-linecap: round; stroke-linejoin: round; } /* DEC-036 | - | [설계결정] one station on two groups; page colour so it stays visible in dark mode */
+.map__name { fill: var(--fg); font-weight: var(--font-weight); } /* DEC-036, TYPE-001 | - | [설계결정] */
+.map a:focus-visible { outline: 1px solid var(--fg); }  /* DEC-008 | - | [설계결정] */
+/* black stations get a white ring in dark mode — DEC-019 | - | [설계결정] */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .map__stop { stroke: var(--c-white); }
+  :root:not([data-theme="light"]) .map__stop { stroke-width: 1px; }
+}
+:root[data-theme="dark"] .map__stop { stroke: var(--c-white); }
+:root[data-theme="dark"] .map__stop { stroke-width: 1px; }

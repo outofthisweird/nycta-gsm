@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NYCTA 1970 → Web · 노선도</title>
+<link rel="stylesheet" href="css/nycta.css">
+<script src="js/nycta-map.js" defer></script>
+<script>/* Local preview font (tools/build_fonts.py helvetica). Never ship (DEC-028). file:// and localhost load it by default; ?font=albert shows the shipped font, ?font=helvetica forces the preview. */ (function(){var q=location.search,local=location.protocol==='file:'||/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);if(/[?&]font=helvetica\b/.test(q)||(local&&!/[?&]font=albert\b/.test(q)))document.write('<link rel="stylesheet" href="preview/helvetica.css">');})();</script>
+<style>
+  /* page scaffolding only (not part of the system) */
+  main { padding: var(--doc-space-4) var(--doc-space-3); max-width: 1400px; }
+  .demo { margin: 0 0 var(--doc-space-4); }
+  .cap { font-size: 12px; color: var(--c-grey); margin: 0 0 6px; letter-spacing: 0; word-spacing: normal; line-height: 1.4; }
+  .lead { font-size: 15px; letter-spacing: 0; word-spacing: normal; line-height: 1.6; max-width: 62ch; margin: 0 0 var(--doc-space-3); }
+  .pair { display: flex; flex-wrap: wrap; gap: var(--doc-space-4); align-items: flex-start; }
+</style>
+</head>
+<body>
+<main>
+  <p class="cap">DEC-036 · 노선도</p>
+  <h1>노선도</h1>
+  <p class="lead">선 하나가 아티클 하나입니다. 같은 그룹(비슷한 내용)의 아티클은 같은 색으로 나란히 붙어 한 줄기로 달리고, 꺾일 때는 같은 중심을 도는 동심원 호로 함께 돕니다. 역은 글자 없는 검은 원이고, 그 역에 서는 선마다 하나씩 찍힙니다. 다른 그룹과 만나는 역은 원끼리 이어집니다.</p>
+
+  <section class="demo">
+    <p class="cap">예시 · 주황 4, 노랑 3, 초록 2, 회색 1, 파랑 1 (주황 둘째 선은 급행: 간격표·글자 여백을 지나침, 넷째 선은 커닝 다음에 갈라짐)</p>
+    <figure class="map" aria-label="예시 노선도">
+<script type="application/json">
+{
+  "groups": {
+    "ledger": { "color": "grey",   "name": "기록" },
+    "type":   { "color": "orange", "name": "서체" },
+    "color":  { "color": "yellow", "name": "색" },
+    "grid":   { "color": "green",  "name": "격자" },
+    "disc":   { "color": "blue",   "name": "원판" }
+  },
+  "stations": {
+    "a":  { "at": [2, 0],     "name": "서체 고르기", "side": "w" },
+    "b":  { "at": [2, 2.5],   "name": "간격표", "side": "w" },
+    "x1": { "at": [2, 5],     "name": "원장\n보관소", "side": "nw" },
+    "c":  { "at": [2, 7],     "name": "글자 여백", "side": "w" },
+    "d":  { "at": [6, 9],     "name": "커닝", "side": "n" },
+    "x3": { "at": [12, 9],    "name": "격자 교차", "side": "ne" },
+    "e":  { "at": [15, 9],    "name": "한글", "side": "e" },
+    "e2": { "at": [15, 10.5], "name": "SUIT", "side": "e", "lang": "en" },
+    "y1": { "at": [6, -1],    "name": "노선색", "side": "e" },
+    "x2": { "at": [8, 5],     "name": "대비", "side": "ne" },
+    "y2": { "at": [8, 7],     "name": "종이색 보정", "side": "e" },
+    "y3": { "at": [8, 12],    "name": "다크 모드", "side": "e" },
+    "g1": { "at": [12, 0],    "name": "모듈", "side": "e" },
+    "x4": { "at": [12, 5],    "name": "판 크기", "side": "ne" },
+    "g2": { "at": [12, 12.5], "name": "여백", "side": "e" },
+    "l0": { "at": [-1, 5],    "name": "Ledger", "side": "n", "lang": "en" },
+    "x5": { "at": [20, 5],    "name": "화살표", "side": "ne" },
+    "l9": { "at": [23, 5],    "name": "검증", "side": "n" },
+    "b1": { "at": [18, 0],    "name": "원판 26개", "side": "e" },
+    "b2": { "at": [20, 10],   "name": "구운 윤곽선", "side": "e" }
+  },
+  "lines": [
+    { "id": "t1", "group": "type", "title": "서체 1", "path": ["a", "b", "x1", "c", [2, 9], "d", "x3", "e"] },
+    { "id": "t2", "group": "type", "title": "서체 2 (급행)", "path": ["a", "b", "x1", "c", [2, 9], "d", "x3", "e"], "skip": ["b", "c"] },
+    { "id": "t3", "group": "type", "title": "서체 3", "path": ["a", "b", "x1", "c", [2, 9], "d", "x3", "e"] },
+    { "id": "t4", "group": "type", "title": "서체 4", "path": ["a", "b", "x1", "c", [2, 9], "d", [10, 9], [11.5, 10.5], "e2"] },
+    { "id": "c1", "group": "color", "title": "색 1", "path": ["y1", [6, 2], [8, 4], "x2", "y2", "y3"] },
+    { "id": "c2", "group": "color", "title": "색 2", "path": ["y1", [6, 2], [8, 4], "x2", "y2", "y3"] },
+    { "id": "c3", "group": "color", "title": "색 3", "path": ["y1", [6, 2], [8, 4], "x2", "y2", "y3"] },
+    { "id": "g1", "group": "grid", "title": "격자 1", "path": ["g1", "x4", "x3", "g2"] },
+    { "id": "g2", "group": "grid", "title": "격자 2", "path": ["g1", "x4", "x3", "g2"] },
+    { "id": "l1", "group": "ledger", "title": "기록", "path": ["l0", "x1", "x2", "x4", "x5", "l9"] },
+    { "id": "d1", "group": "disc", "title": "원판", "path": ["b1", [18, 2], [20, 4], "x5", "b2"] }
+  ]
+}
+</script>
+    </figure>
+  </section>
+
+  <section class="demo">
+    <p class="cap">붙이기 · 같은 그룹에 아티클을 하나 더 적으면 줄기가 가운데를 유지한 채 한 가닥 굵어집니다 (왼쪽 2개 → 오른쪽 3개, 데이터는 한 줄 추가)</p>
+    <div class="pair">
+      <figure class="map" aria-label="그룹에 2개">
+<script type="application/json">
+{ "groups": { "g": { "color": "red" } },
+  "stations": { "a": { "at": [0, 0], "name": "시작", "side": "w" }, "b": { "at": [0, 3], "name": "중간", "side": "w" }, "c": { "at": [4, 5], "name": "끝", "side": "s" } },
+  "lines": [ { "id": "1", "group": "g", "path": ["a", "b", [0, 5], "c"] },
+             { "id": "2", "group": "g", "path": ["a", "b", [0, 5], "c"] } ] }
+</script>
+      </figure>
+      <figure class="map" aria-label="그룹에 3개">
+<script type="application/json">
+{ "groups": { "g": { "color": "red" } },
+  "stations": { "a": { "at": [0, 0], "name": "시작", "side": "w" }, "b": { "at": [0, 3], "name": "중간", "side": "w" }, "c": { "at": [4, 5], "name": "끝", "side": "s" } },
+  "lines": [ { "id": "1", "group": "g", "path": ["a", "b", [0, 5], "c"] },
+             { "id": "2", "group": "g", "path": ["a", "b", [0, 5], "c"] },
+             { "id": "3", "group": "g", "path": ["a", "b", [0, 5], "c"] } ] }
+</script>
+      </figure>
+    </div>
+  </section>
+</main>
+</body>
+</html>
