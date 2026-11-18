@@ -247,9 +247,8 @@ p { margin: 0 0 var(--doc-space-3); }
   border-top: var(--stroke-band) solid var(--fg);       /* GRID-013 | pdf p.64 | [이미지판독] band above the field */
   background: var(--bg);
   color: var(--fg);
-  width: max-content;
-  max-width: 100%;
-  min-width: 0;
+  width: max-content;                                   /* DEC-023 | - | [설계결정] the whole plate (field + band) sticks out when wider than its container; */
+  min-width: 0;                                         /*   no max-width, or the field and band stop at the container while the cells run on */
   overflow: visible;                                    /* DEC-023 | - | [설계결정] plates never scroll inside; a plate wider than the screen sticks out */
 }
 .m {                                                    /* GRID-012 | pdf p.64 | [확정] 1 ft module cell, field 12in */
@@ -264,8 +263,8 @@ p { margin: 0 0 var(--doc-space-3); }
 .m-6 { width: calc(var(--module) * 6); }                /* SIGN-012 | pdf p.66 | [확정] */
 .m-8 { width: calc(var(--module) * 8); }                /* GRID-012 | pdf p.64 | [확정] identification 8×1 */
 .m-auto { width: auto; min-width: var(--module); padding-right: var(--space-margin); } /* SIGN-003 | pdf p.62 | [이미지판독] copy width varies */
-/* With chart kerning (DEC-024) 'Times Square' fits 6 ft and 'Broadway Nassau' 8 ft at 9in caps;
-   names that still exceed a fixed plate (e.g. 'Avenue M' needs ≈4.5 ft) use .m-auto (DEC-022). */
+/* Identification plates size themselves to the name in ½ ft steps (DEC-030, .sign-ident below + js/nycta.js);
+   .m-auto is for other copy cells whose width varies (Exit, Transfer). */
 .m-blank { padding: 0; }                                /* SIGN-004 | pdf p.62 | [확정] blank 1×1 between directions */
 .m-center { display: grid; place-items: center; padding: 0; } /* GRID-016, GRID-017 | pdf p.65 | [이미지판독] disc/arrow centered */
 .m-center { overflow: clip; }                           /* DEC-023 | - | [설계결정] a rotated arrow's box must not spill out; ink stays inside the 11in circle */
@@ -598,7 +597,7 @@ td { padding: var(--doc-space-1); border-bottom: var(--doc-rule) solid var(--fg)
 
 /* -------------------------------------------------------------------------
    13. Component — route map (DEC-036)
-   Markup: <figure class="map" aria-label="…"><script type="application/json">{ groups, stations, lines }</script></figure>
+   Markup: <figure class="map" aria-label="…"><script type="application/json">{ groups, articles, series }</script></figure>
    + js/nycta-map.js (draws the SVG). Data format: see the head of js/nycta-map.js.
    ------------------------------------------------------------------------- */
 .map {
