@@ -76,6 +76,28 @@
   </section>
 
   <section class="demo">
+    <p class="cap">역 기준 · 역은 언제나 자기 격자점에 놓이고 선이 그 점을 지나갑니다. 왼쪽: 역이 꺾이는 점에 있으면 선이 역에서 바로 꺾임. 오른쪽: 꺾는 점([x, y])을 역 사이에 두면 묵직한 곡선이 되고, 곡선은 역에 닿기 전에 끝남</p>
+    <div class="pair">
+      <figure class="map" aria-label="꺾이는 점에 놓인 역">
+<script type="application/json">
+{ "grid": true, "groups": { "g": { "color": "yellow" } },
+  "articles": { "p1": { "at": [0, 0], "name": "팝아트", "side": "n" }, "p2": { "at": [3, 0], "name": "변기", "side": "ne" },
+                "p3": { "at": [3, 3], "name": "아우라", "side": "w" }, "p4": { "at": [4, 3], "name": "동시대성", "side": "s" }, "p5": { "at": [6, 5], "name": "다음", "side": "e" } },
+  "series": [ { "id": "A", "group": "g", "path": ["p1", "p2", "p3", "p4", "p5"] } ] }
+</script>
+      </figure>
+      <figure class="map" aria-label="역 사이에서 꺾이는 선">
+<script type="application/json">
+{ "grid": true, "groups": { "g": { "color": "yellow" } },
+  "articles": { "p1": { "at": [0, 0], "name": "팝아트", "side": "n" }, "p2": { "at": [2, 0], "name": "변기", "side": "n" },
+                "p3": { "at": [3, 2], "name": "아우라", "side": "w" }, "p4": { "at": [4, 4], "name": "동시대성", "side": "s" }, "p5": { "at": [8, 7], "name": "다음", "side": "e" } },
+  "series": [ { "id": "A", "group": "g", "path": ["p1", "p2", [3, 0], "p3", [3, 4], "p4", [5, 4], "p5"] } ] }
+</script>
+      </figure>
+    </div>
+  </section>
+
+  <section class="demo">
     <p class="cap">붙이기 · 왼쪽은 시리즈 하나. 오른쪽은 비슷한 시리즈를 같은 그룹에 하나 더 적은 것: 줄기가 가운데를 유지한 채 두 가닥이 되고, 역은 각자 자기 가닥에만 찍힙니다</p>
     <div class="pair">
       <figure class="map" aria-label="시리즈 하나">

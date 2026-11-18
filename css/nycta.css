@@ -617,14 +617,8 @@ td { padding: var(--doc-space-1); border-bottom: var(--doc-rule) solid var(--fg)
 .map__svg { display: block; max-width: none; overflow: visible; }
 .map__casing { fill: none; stroke: var(--bg); stroke-linecap: butt; stroke-linejoin: round; } /* DEC-036 | - | [설계결정] ground cut where lines cross */
 .map__line { fill: none; stroke: var(--line); stroke-linecap: butt; stroke-linejoin: round; } /* DEC-036, COLOR-003 | - | [설계결정] route colour */
-.map__stop { fill: var(--c-black); }                    /* DEC-036 | - | [설계결정] station = plain black circle, no letter */
+.map__stop { fill: var(--c-black); }                    /* DEC-036 | - | [설계결정] station = plain black circle, no letter; no dark-mode ring (it always sits on a line) */
 .map__transfer { fill: none; stroke: var(--fg); stroke-linecap: round; stroke-linejoin: round; } /* DEC-036 | - | [설계결정] one station on two groups; page colour so it stays visible in dark mode */
+.map__grid line { stroke: var(--c-grey); stroke-width: 1px; opacity: 0.35; vector-effect: non-scaling-stroke; } /* DEC-036 | - | [설계결정] alignment check only ("grid": true) */
 .map__name { fill: var(--fg); font-weight: var(--font-weight); } /* DEC-036, TYPE-001 | - | [설계결정] */
 .map a:focus-visible { outline: 1px solid var(--fg); }  /* DEC-008 | - | [설계결정] */
-/* black stations get a white ring in dark mode — DEC-019 | - | [설계결정] */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .map__stop { stroke: var(--c-white); }
-  :root:not([data-theme="light"]) .map__stop { stroke-width: 1px; }
-}
-:root[data-theme="dark"] .map__stop { stroke: var(--c-white); }
-:root[data-theme="dark"] .map__stop { stroke-width: 1px; }

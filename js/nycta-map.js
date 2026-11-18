@@ -12,8 +12,12 @@
    listed, first strand on the left of the direction the path is written in: write a group's series in the
    same direction and over the same points where they run together. Adding a series to a group re-centres
    the bundle; adding an article is one entry in articles plus its id in the series path.
-   Bends are concentric arcs: the innermost strand turns on --map-radius pitches, each further strand
-   one pitch more. Names clear every strand at their article, including similar series passing by. */
+   Articles are the fixed points: every circle sits on its article's grid point (offset to its own strand), and
+   the line is drawn through them. Bends at bare points are concentric arcs (innermost strand --map-radius
+   pitches, each further strand one pitch more), made smaller where needed so they never start curving before
+   an article; an article on a corner is turned on directly (no arc through the article). For heavy curves,
+   put the corner on a bare point between articles. Names clear every strand at their article, including
+   similar series passing by. "grid": true draws the grid underneath (for checking alignment). */
 (function () {
   'use strict';
   var NS = 'http://www.w3.org/2000/svg';
@@ -50,8 +54,9 @@
   var f = function (v) { return Math.round(v * 100) / 100; };
 
   /* One strand: the centre path shifted by d (positive = right of travel on screen), each bend filleted
-     with r = R0 − turn·d so every strand of a bundle bends round the same centre. Returns the SVG path and
-     where each path point ended up (on the straight, or the middle of its arc). */
+     with r = R0[j] − turn·d so every strand of a bundle bends round the same centre. R0[j] = 0 makes the
+     bundle turn on the point itself (an article on the corner): that strand's corner is the exact offset point.
+     Returns the SVG path and where each path point ended up (on the straight, the corner, or mid-arc). */
   function strand(pts, d, R0) {
     var n = pts.length, u = [], nn = [];
     for (var i = 0; i < n - 1; i++) { u[i] = unit(sub(pts[i + 1], pts[i])); nn[i] = [-u[i][1], u[i][0]]; }
@@ -71,7 +76,8 @@
       if (Math.abs(c) < 1e-9 && dot(u[b - 1], u[b]) > 0) continue;
       var turn = c > 0 ? 1 : -1;
       var theta = Math.acos(Math.max(-1, Math.min(1, dot(u[b - 1], u[b]))));
-      var r = Math.max(0, R0 - turn * d);
+      var r = Math.max(0, R0[b] - turn * d);
+      if (r < 0.01) continue; // turns on the point
       bend[b] = { turn: turn, tan: Math.tan(theta / 2), r: r, t: r * Math.tan(theta / 2) };
     }
     for (var s = 0; s < n - 1; s++) {
@@ -86,7 +92,7 @@
     var dstr = 'M' + f(q[0][0]) + ' ' + f(q[0][1]), at = [q[0]];
     for (var v = 1; v < n - 1; v++) {
       var bv = bend[v];
-      if (!bv) { at[v] = q[v]; continue; }
+      if (!bv) { at[v] = q[v]; dstr += 'L' + f(q[v][0]) + ' ' + f(q[v][1]); continue; }
       var a = sub(q[v], mul(u[v - 1], bv.t)), e = add(q[v], mul(u[v], bv.t));
       dstr += 'L' + f(a[0]) + ' ' + f(a[1]) + 'A' + f(bv.r) + ' ' + f(bv.r) + ' 0 0 ' + (bv.turn > 0 ? 1 : 0) + ' ' + f(e[0]) + ' ' + f(e[1]);
       var centre = add(a, mul(nn[v - 1], bv.turn * bv.r));
@@ -133,6 +139,11 @@
       var gEl = el('g', { class: 'map__group', 'data-group': gid, style: '--line:' + col }, gLines);
       var casings = el('g', { class: 'map__casings' }, gEl);
       var strokes = el('g', { class: 'map__strokes' }, gEl);
+      // every article of the group, so all strands of the bundle make the same choice at a corner
+      var groupArts = [];
+      list.forEach(function (sr) {
+        sr.path.forEach(function (p) { if (typeof p === 'string' && articles[p]) groupArts.push([articles[p].at[0] * G, articles[p].at[1] * G]); });
+      });
       list.forEach(function (sr, i) {
         var pts = [], ids = [];
         sr.path.forEach(function (p) {
@@ -151,7 +162,26 @@
         if (last > 0 && ids[0]) {
           pts.unshift(add(pts[0], mul(unit(sub(pts[0], pts[1])), ext))); ids.unshift(null);
         }
-        var d = (i - (nG - 1) / 2) * P, s = strand(pts, d, R0);
+        /* Articles are the fixed points (DEC-036): an article on a corner keeps its grid point and the bundle
+           turns on it; a bend at a bare point keeps its heavy radius, but is made smaller where it would
+           otherwise start curving before an article on either leg, so articles always sit on a straight. */
+        var R0s = pts.map(function (pt, j) {
+          if (j === 0 || j === pts.length - 1) return R0;
+          if (groupArts.some(function (a) { return len(sub(a, pt)) < 0.5; })) return 0;
+          var uin = unit(sub(pt, pts[j - 1])), uout = unit(sub(pts[j + 1], pt));
+          var theta = Math.acos(Math.max(-1, Math.min(1, dot(uin, uout))));
+          if (theta < 1e-6) return R0;
+          var room = Infinity;
+          [[pts[j - 1], uin, -1], [pts[j + 1], uout, 1]].forEach(function (leg) {
+            var Lseg = len(sub(leg[0], pt));
+            groupArts.forEach(function (a) {
+              var w = sub(a, pt), along = leg[2] * dot(w, leg[1]);
+              if (along > 0.5 && along <= Lseg + 0.5 && Math.abs(cross(leg[1], w)) < 0.5) room = Math.min(room, along);
+            });
+          });
+          return Math.min(R0, room / Math.tan(theta / 2));
+        });
+        var d = (i - (nG - 1) / 2) * P, s = strand(pts, d, R0s);
         el('path', { class: 'map__casing', d: s.d, 'stroke-width': f(P + gap) }, casings);
         var parent = strokes;
         if (sr.href) parent = el('a', { href: sr.href, 'aria-label': sr.name || sr.id }, strokes);
@@ -240,6 +270,12 @@
       ts.setAttribute('x', f(parseFloat(ts.getAttribute('x')) - pull * px(host, '--map-fs')));
     });
     var bb = root.getBBox(), pad = gap;
+    if (data.grid) {
+      var gGrid = el('g', { class: 'map__grid' });
+      root.insertBefore(gGrid, root.firstChild);
+      for (var gx = Math.ceil(bb.x / G) * G; gx <= bb.x + bb.width; gx += G) el('line', { x1: f(gx), y1: f(bb.y), x2: f(gx), y2: f(bb.y + bb.height) }, gGrid);
+      for (var gy = Math.ceil(bb.y / G) * G; gy <= bb.y + bb.height; gy += G) el('line', { x1: f(bb.x), y1: f(gy), x2: f(bb.x + bb.width), y2: f(gy) }, gGrid);
+    }
     var x = bb.x - pad, y = bb.y - pad, w = bb.width + 2 * pad, h = bb.height + 2 * pad;
     svg.setAttribute('viewBox', [f(x), f(y), f(w), f(h)].join(' '));
     svg.setAttribute('width', f(w));
