@@ -13,16 +13,21 @@
    same direction and over the same points where they run together. Adding a series to a group re-centres
    the bundle; adding an article is one entry in articles plus its id in the series path.
    Articles are the fixed points: every circle sits on its article's grid point (offset to its own strand), and
-   the line is drawn through them. Bends at bare points are concentric arcs (innermost strand --map-radius
-   pitches, each further strand one pitch more), made smaller where needed so they never start curving before
-   an article; an article on a corner is turned on directly (no arc through the article). For heavy curves,
-   put the corner on a bare point between articles. Names clear every strand at their article, including
-   similar series passing by. "grid": true draws the grid underneath (for checking alignment). */
+   the line is drawn through them. Bends belong on bare points between articles, never on an article. A bend is
+   a set of concentric arcs at full radius (innermost strand --map-radius pitches, each further strand one pitch
+   more), so the inside of a bend is always round; arcs are shortened only where two bends are too close for
+   both. An article on a corner, or so close to a bend that the curve reaches it, is a data error: the console
+   warns and the circle moves onto the curve. Names clear every strand at their article (similar series passing
+   by included); a name that would touch another stretch of line or another name moves to the nearest free side.
+   At a transfer where one group's circle is left out (it would touch the other group's), that group's line is
+   drawn over the other bundle up to the circle, so the station reads as shared. "grid": true draws the grid
+   underneath (for checking alignment). */
 (function () {
   'use strict';
   var NS = 'http://www.w3.org/2000/svg';
   var TOKENS = ['yellow', 'orange', 'red', 'magenta', 'green', 'lightblue', 'blue', 'grey', 'black'];
   var SIDES = { e: [1, 0], w: [-1, 0], n: [0, -1], s: [0, 1], ne: [1, -1], nw: [-1, -1], se: [1, 1], sw: [-1, 1] };
+  var uid = 0;
 
   function el(name, attrs, parent) {
     var e = document.createElementNS(NS, name);
@@ -52,11 +57,13 @@
   var len = function (a) { return Math.hypot(a[0], a[1]); };
   var unit = function (a) { var l = len(a); return [a[0] / l, a[1] / l]; };
   var f = function (v) { return Math.round(v * 100) / 100; };
+  var pt = function (p) { return f(p[0]) + ' ' + f(p[1]); };
 
-  /* One strand: the centre path shifted by d (positive = right of travel on screen), each bend filleted
-     with r = R0[j] − turn·d so every strand of a bundle bends round the same centre. R0[j] = 0 makes the
-     bundle turn on the point itself (an article on the corner): that strand's corner is the exact offset point.
-     Returns the SVG path and where each path point ended up (on the straight, the corner, or mid-arc). */
+  /* One strand: the centre path shifted by d (positive = right of travel on screen), each turn filleted with
+     r = R0 − turn·d so every strand of a bundle bends round the same centre. Turns keep the full radius; arcs
+     are shortened only where two neighbouring turns (or a turn and a path end) leave too little room.
+     Returns the SVG path, where each path point ended up, and which points the curve covers (a point on a
+     corner, or on a straight so close to a corner that the arc starts before it). */
   function strand(pts, d, R0) {
     var n = pts.length, u = [], nn = [];
     for (var i = 0; i < n - 1; i++) { u[i] = unit(sub(pts[i + 1], pts[i])); nn[i] = [-u[i][1], u[i][0]]; }
@@ -69,38 +76,53 @@
         q[j] = add(pts[j], mul(m, d / (1 + dot(nn[j - 1], nn[j]))));
       }
     }
-    // fillet sizes, clamped so neighbouring arcs never overlap
-    var bend = [];
+    var turns = [0], bend = [];
     for (var b = 1; b < n - 1; b++) {
       var c = cross(u[b - 1], u[b]);
       if (Math.abs(c) < 1e-9 && dot(u[b - 1], u[b]) > 0) continue;
-      var turn = c > 0 ? 1 : -1;
+      turns.push(b);
       var theta = Math.acos(Math.max(-1, Math.min(1, dot(u[b - 1], u[b]))));
-      var r = Math.max(0, R0[b] - turn * d);
-      if (r < 0.01) continue; // turns on the point
+      var turn = c > 0 ? 1 : -1, r = Math.max(0, R0 - turn * d);
+      if (r < 0.01 || theta > Math.PI - 1e-3) continue; // radius 0 (or a U-turn): turns on the point
       bend[b] = { turn: turn, tan: Math.tan(theta / 2), r: r, t: r * Math.tan(theta / 2) };
     }
-    for (var s = 0; s < n - 1; s++) {
-      var L = len(sub(q[s + 1], q[s])), A = bend[s], B = bend[s + 1];
+    turns.push(n - 1);
+    for (var k = 0; k < turns.length - 1; k++) {
+      var A = bend[turns[k]], B = bend[turns[k + 1]], L = len(sub(q[turns[k + 1]], q[turns[k]]));
       var need = (A ? A.t : 0) + (B ? B.t : 0);
       if (need > L && need > 0) {
-        var k = L / need;
-        if (A) { A.t = Math.min(A.t, A.t * k); A.r = A.t / A.tan; }
-        if (B) { B.t = Math.min(B.t, B.t * k); B.r = B.t / B.tan; }
+        var s = L / need;
+        if (A) { A.t *= s; A.r = A.t / A.tan; }
+        if (B) { B.t *= s; B.r = B.t / B.tan; }
       }
     }
-    var dstr = 'M' + f(q[0][0]) + ' ' + f(q[0][1]), at = [q[0]];
-    for (var v = 1; v < n - 1; v++) {
+    turns.forEach(function (v) {
       var bv = bend[v];
-      if (!bv) { at[v] = q[v]; dstr += 'L' + f(q[v][0]) + ' ' + f(q[v][1]); continue; }
-      var a = sub(q[v], mul(u[v - 1], bv.t)), e = add(q[v], mul(u[v], bv.t));
-      dstr += 'L' + f(a[0]) + ' ' + f(a[1]) + 'A' + f(bv.r) + ' ' + f(bv.r) + ' 0 0 ' + (bv.turn > 0 ? 1 : 0) + ' ' + f(e[0]) + ' ' + f(e[1]);
-      var centre = add(a, mul(nn[v - 1], bv.turn * bv.r));
-      at[v] = add(centre, mul(unit(sub(q[v], centre)), bv.r));
+      if (!bv) return;
+      bv.a = sub(q[v], mul(u[v - 1], bv.t));
+      bv.e = add(q[v], mul(u[v], bv.t));
+      bv.c = add(bv.a, mul(nn[v - 1], bv.turn * bv.r));
+    });
+    var onArc = function (bv, p) { return add(bv.c, mul(unit(sub(p, bv.c)), bv.r)); };
+
+    var dstr = 'M' + pt(q[0]), at = [q[0]], curved = [], seg = 0;
+    for (var v = 1; v < n; v++) {
+      while (turns[seg + 1] < v) seg++;              // turns[seg] < v <= turns[seg + 1]
+      var bv = bend[v];
+      if (bv) {
+        dstr += 'L' + pt(bv.a) + 'A' + f(bv.r) + ' ' + f(bv.r) + ' 0 0 ' + (bv.turn > 0 ? 1 : 0) + ' ' + pt(bv.e);
+        at[v] = onArc(bv, q[v]); curved[v] = true;
+        continue;
+      }
+      if (turns[seg + 1] !== v) {                   // on a straight: a neighbouring arc may already cover it
+        var prev = bend[turns[seg]], next = bend[turns[seg + 1]], cov = null;
+        if (prev && len(sub(q[v], q[turns[seg]])) < prev.t - 1e-6) cov = prev;
+        if (next && len(sub(q[v], q[turns[seg + 1]])) < next.t - 1e-6) cov = next;
+        if (cov) { at[v] = onArc(cov, q[v]); curved[v] = true; continue; }
+      }
+      at[v] = q[v]; dstr += 'L' + pt(q[v]);
     }
-    dstr += 'L' + f(q[n - 1][0]) + ' ' + f(q[n - 1][1]);
-    at[n - 1] = q[n - 1];
-    return { d: dstr, at: at };
+    return { d: dstr, at: at, curved: curved };
   }
 
   function draw(host) {
@@ -111,16 +133,21 @@
     if (old) old.remove();
 
     var P = px(host, '--map-pitch'), gap = px(host, '--map-gap'), stop = px(host, '--map-stop');
-    var cap = px(host, '--map-cap'), lgap = px(host, '--map-label-gap');
+    var cap = px(host, '--map-cap'), lgap = px(host, '--map-label-gap'), fs = px(host, '--map-fs');
     var G = (data.unit || num(host, '--map-unit', 2)) * P;
-    var R = (data.radius || num(host, '--map-radius', 1)) * P;
-    var lh = num(host, '--lh-g1', 0.9545) * px(host, '--map-fs');
+    var R = (data.radius != null ? data.radius : num(host, '--map-radius', 1)) * P;
+    var lh = num(host, '--lh-g1', 0.9545) * fs;
     var groups = data.groups || {}, articles = data.articles || {}, series = data.series || [];
+    var warned = host.__nyctaMapWarned = host.__nyctaMapWarned || {}; // once per map, not on every redraw
+    var warn = function (key, msg) { if (!warned[key]) { warned[key] = 1; console.warn('map: ' + msg + ' (DEC-036)'); } };
 
     var svg = el('svg', { class: 'map__svg', role: 'group' });
     if (host.getAttribute('aria-label')) svg.setAttribute('aria-label', host.getAttribute('aria-label'));
+    host.insertBefore(svg, host.firstChild); // in the document from the start: names are measured as they are placed
+    var defs = el('defs', {}, svg);
     var root = el('g', {}, svg);
     var gLines = el('g', { class: 'map__lines' }, root);
+    var gOver = el('g', { class: 'map__over' }, root);
     var gLinks = el('g', { class: 'map__transfers' }, root);
     var gStops = el('g', { class: 'map__stops' }, root);
     var gNames = el('g', { class: 'map__names' }, root);
@@ -130,7 +157,7 @@
     series.forEach(function (sr) { (members[sr.group] = members[sr.group] || []).push(sr); });
     var order = Object.keys(groups).concat(Object.keys(members).filter(function (g) { return !(g in groups); }));
 
-    var drawn = []; // { id, group, pts, ids, d, s }
+    var drawn = []; // { id, group, col, pts, ids, d, s }
     order.forEach(function (gid) {
       var list = members[gid];
       if (!list) return;
@@ -139,19 +166,14 @@
       var gEl = el('g', { class: 'map__group', 'data-group': gid, style: '--line:' + col }, gLines);
       var casings = el('g', { class: 'map__casings' }, gEl);
       var strokes = el('g', { class: 'map__strokes' }, gEl);
-      // every article of the group, so all strands of the bundle make the same choice at a corner
-      var groupArts = [];
-      list.forEach(function (sr) {
-        sr.path.forEach(function (p) { if (typeof p === 'string' && articles[p]) groupArts.push([articles[p].at[0] * G, articles[p].at[1] * G]); });
-      });
       list.forEach(function (sr, i) {
         var pts = [], ids = [];
         sr.path.forEach(function (p) {
           var xy = typeof p === 'string' ? (articles[p] || {}).at : p;
           if (!xy) throw new Error('map: unknown article ' + p);
-          var pt = [xy[0] * G, xy[1] * G];
-          if (pts.length && len(sub(pt, pts[pts.length - 1])) < 1e-6) { if (typeof p === 'string') ids[ids.length - 1] = p; return; }
-          pts.push(pt); ids.push(typeof p === 'string' ? p : null);
+          var q = [xy[0] * G, xy[1] * G];
+          if (pts.length && len(sub(q, pts[pts.length - 1])) < 1e-6) { if (typeof p === 'string') ids[ids.length - 1] = p; return; }
+          pts.push(q); ids.push(typeof p === 'string' ? p : null);
         });
         /* A series that ends at an article runs on past it by half the strand width, so the terminal circle sits
            inside the strand with the same margin at the end as at the sides (DEC-036). */
@@ -162,32 +184,17 @@
         if (last > 0 && ids[0]) {
           pts.unshift(add(pts[0], mul(unit(sub(pts[0], pts[1])), ext))); ids.unshift(null);
         }
-        /* Articles are the fixed points (DEC-036): an article on a corner keeps its grid point and the bundle
-           turns on it; a bend at a bare point keeps its heavy radius, but is made smaller where it would
-           otherwise start curving before an article on either leg, so articles always sit on a straight. */
-        var R0s = pts.map(function (pt, j) {
-          if (j === 0 || j === pts.length - 1) return R0;
-          if (groupArts.some(function (a) { return len(sub(a, pt)) < 0.5; })) return 0;
-          var uin = unit(sub(pt, pts[j - 1])), uout = unit(sub(pts[j + 1], pt));
-          var theta = Math.acos(Math.max(-1, Math.min(1, dot(uin, uout))));
-          if (theta < 1e-6) return R0;
-          var room = Infinity;
-          [[pts[j - 1], uin, -1], [pts[j + 1], uout, 1]].forEach(function (leg) {
-            var Lseg = len(sub(leg[0], pt));
-            groupArts.forEach(function (a) {
-              var w = sub(a, pt), along = leg[2] * dot(w, leg[1]);
-              if (along > 0.5 && along <= Lseg + 0.5 && Math.abs(cross(leg[1], w)) < 0.5) room = Math.min(room, along);
-            });
-          });
-          return Math.min(R0, room / Math.tan(theta / 2));
+        var d = (i - (nG - 1) / 2) * P, s = strand(pts, d, R0);
+        ids.forEach(function (aid, j) {
+          if (aid && s.curved[j]) warn(sr.id + ' ' + aid, 'article "' + aid + '" sits on a bend of series "' + sr.id +
+            '"; put the bend on a bare point [x, y] between articles, at least one bend length away');
         });
-        var d = (i - (nG - 1) / 2) * P, s = strand(pts, d, R0s);
         el('path', { class: 'map__casing', d: s.d, 'stroke-width': f(P + gap) }, casings);
         var parent = strokes;
         if (sr.href) parent = el('a', { href: sr.href, 'aria-label': sr.name || sr.id }, strokes);
         var path = el('path', { class: 'map__line', d: s.d, 'stroke-width': f(P - gap), 'data-series': sr.id }, parent);
         if (sr.name) el('title', {}, path).textContent = sr.name;
-        drawn.push({ id: sr.id, group: gid, pts: pts, ids: ids, d: d, s: s });
+        drawn.push({ id: sr.id, group: gid, col: col, pts: pts, ids: ids, d: d, s: s });
       });
     });
 
@@ -202,12 +209,13 @@
       return null;
     }
 
+    var names = [];
     Object.keys(articles).forEach(function (id) {
       var ar = articles[id], S = [ar.at[0] * G, ar.at[1] * G], hits = [];
       drawn.forEach(function (sd) {
-        var stopHere = sd.ids.indexOf(id) >= 0;
-        var p = stopHere ? sd.s.at[sd.ids.indexOf(id)] : strandAt(sd, S);
-        if (p) hits.push({ p: p, stop: stopHere, group: sd.group });
+        var k = sd.ids.indexOf(id), stopHere = k >= 0;
+        var p = stopHere ? sd.s.at[k] : strandAt(sd, S);
+        if (p) hits.push({ p: p, stop: stopHere, group: sd.group, sd: sd, k: k });
       });
       var stops = hits.filter(function (h) { return h.stop; });
       if (!stops.length) return; // on no series yet
@@ -215,10 +223,41 @@
          one already placed is left out, so a crossing reads as one cluster (the bigger bundle's). */
       var count = {};
       stops.forEach(function (h) { count[h.group] = (count[h.group] || 0) + 1; });
+      var rank = function (h) { return [count[h.group], members[h.group].length, order.indexOf(h.group)]; };
       var placed = [];
-      stops.slice().sort(function (h1, h2) { return count[h2.group] - count[h1.group]; }).forEach(function (h) {
+      stops.slice().sort(function (h1, h2) {          // most stops here, then the bigger bundle, then the one drawn on top
+        var a = rank(h1), b = rank(h2);
+        return b[0] - a[0] || b[1] - a[1] || b[2] - a[2];
+      }).forEach(function (h) {
         if (placed.some(function (q) { return len(sub(q.p, h.p)) < stop * 1.25; })) return;
         placed.push(h);
+      });
+      var shown = {};
+      placed.forEach(function (h) { shown[h.group] = 1; });
+      /* Circles of two groups merged into one: every stopping group's line but the top-drawn one crosses over
+         the other bundles up to the shared circle (casing included), instead of being cut by their casing,
+         so the station reads as shared. */
+      var stopGroups = Object.keys(count);
+      var merged = stopGroups.some(function (g) { return !shown[g]; });
+      var top = stopGroups.reduce(function (m, g) { return order.indexOf(g) > order.indexOf(m) ? g : m; }, stopGroups[0]);
+      stops.forEach(function (h) {
+        if (!merged || h.group === top) return;
+        var others = hits.filter(function (o) { return o.group !== h.group; });
+        if (!others.length) return;
+        var sd = h.sd, a = sd.pts[Math.max(0, h.k - 1)], b = sd.pts[Math.min(sd.pts.length - 1, h.k + 1)];
+        var dir = unit(sub(b, a)), nrm = [-dir[1], dir[0]], C = h.p;
+        var Lh = others.reduce(function (m, o) { return Math.max(m, Math.abs(dot(sub(o.p, C), dir))); }, 0) + P + gap;
+        var W = (P + gap) / 2 + 0.5;
+        // the line copy reaches a little past its casing copy, so the two never share an anti-aliased clip edge
+        var clip = function (L) {
+          var cid = 'map-clip-' + (++uid), cp = el('clipPath', { id: cid }, defs);
+          el('polygon', { points: [add(add(C, mul(dir, -L)), mul(nrm, -W)), add(add(C, mul(dir, L)), mul(nrm, -W)),
+            add(add(C, mul(dir, L)), mul(nrm, W)), add(add(C, mul(dir, -L)), mul(nrm, W))].map(pt).join(' ') }, cp);
+          return 'url(#' + cid + ')';
+        };
+        var g = el('g', { class: 'map__group', 'data-group': h.group, style: '--line:' + sd.col }, gOver);
+        el('path', { class: 'map__casing', d: sd.s.d, 'stroke-width': f(P + gap), 'clip-path': clip(Lh) }, g);
+        el('path', { class: 'map__line', d: sd.s.d, 'stroke-width': f(P - gap), 'clip-path': clip(Lh + P / 2) }, g);
       });
       // an article in series of different groups whose circles stay apart: one bar between the nearest circles
       var byGroup = {};
@@ -238,14 +277,32 @@
         var c = el('circle', { class: 'map__stop', cx: f(h.p[0]), cy: f(h.p[1]), r: f(stop / 2), 'data-article': id }, parent);
         if (!ar.href) el('title', {}, c).textContent = label;
       });
+      if (ar.name) names.push({ id: id, ar: ar, S: S, hits: hits, placed: placed });
+    });
 
-      if (!ar.name) return;
-      var side = SIDES[ar.side || 'e'] || SIDES.e;
+    /* Names. Every stretch of line is sampled (arcs included) so a name can be checked against all of it,
+       not only against the strands at its own article. */
+    var samples = [];
+    gLines.querySelectorAll('.map__line').forEach(function (p) {
+      // each sample stands for a disc of the stroke's half width; the ends are butt-cut, so stop one half width short
+      var hw = parseFloat(p.getAttribute('stroke-width')) / 2, T = p.getTotalLength();
+      for (var l = Math.min(hw, T / 2); l <= T - Math.min(hw, T / 2) + 1e-6; l += 2) { var q = p.getPointAtLength(l); samples.push([q.x, q.y, hw]); }
+    });
+    var boxes = [];
+    function blocked(r) {
+      for (var i = 0; i < samples.length; i++) {
+        var s = samples[i], dx = Math.max(r[0] - s[0], 0, s[0] - r[2]), dy = Math.max(r[1] - s[1], 0, s[1] - r[3]);
+        if (Math.hypot(dx, dy) < s[2] + lgap - 1.5) return true;
+      }
+      return boxes.some(function (o) { var e = lgap / 2; return r[0] < o[2] + e && r[2] > o[0] - e && r[1] < o[3] + e && r[3] > o[1] - e; });
+    }
+    function place(nm, key) {
+      var ar = nm.ar, S = nm.S, side = SIDES[key];
       // clear every strand at the article (stopping or passing), per axis
-      var reach = function (ax, sg) { return hits.reduce(function (m, h) { return Math.max(m, sg * (h.p[ax] - S[ax])); }, 0) + P / 2 + lgap; };
+      var reach = function (ax, sg) { return nm.hits.reduce(function (m, h) { return Math.max(m, sg * (h.p[ax] - S[ax])); }, 0) + P / 2 + lgap; };
       var A = [S[0] + (side[0] ? side[0] * reach(0, side[0]) : 0), S[1] + (side[1] ? side[1] * reach(1, side[1]) : 0)];
       // beside a bundle the name lines up with its own circles, not the bundle's centre line
-      var mean = function (ax) { return placed.reduce(function (m, h) { return m + h.p[ax]; }, 0) / placed.length; };
+      var mean = function (ax) { return nm.placed.reduce(function (m, h) { return m + h.p[ax]; }, 0) / nm.placed.length; };
       if (!side[1]) A[1] = mean(1);
       if (!side[0]) A[0] = mean(0);
       A = add(A, [(ar.dx || 0) * P, (ar.dy || 0) * P]);
@@ -254,21 +311,35 @@
       else if (side[1] < 0) y0 = A[1] - (k - 1) * lh;
       else y0 = A[1] + cap;
       var anchor = side[0] > 0 ? 'start' : side[0] < 0 ? 'end' : 'middle';
-      var tParent = ar.href ? el('a', { href: ar.href, tabindex: '-1', 'aria-hidden': 'true' }, gNames) : gNames;
-      var t = el('text', { class: 'map__name', x: f(A[0]), y: f(y0), 'text-anchor': anchor }, tParent);
+      var node = ar.href ? el('a', { href: ar.href, tabindex: '-1', 'aria-hidden': 'true' }, gNames) : gNames;
+      var t = el('text', { class: 'map__name', x: f(A[0]), y: f(y0), 'text-anchor': anchor }, node);
       if (ar.lang) t.setAttribute('lang', ar.lang);
       rows.forEach(function (row, r) {
         var ts = el('tspan', { x: f(A[0]), y: f(y0 + r * lh) }, t);
         ts.textContent = row;
+        // first-letter side bearing (DEC-025 / DEC-033) for flush-left names
+        if (anchor === 'start') ts.setAttribute('x', f(A[0] - (parseFloat(getComputedStyle(ts).getPropertyValue('--lsb-pull')) || 0) * fs));
       });
+      var bb = t.getBBox();
+      return { node: node === gNames ? t : node, rect: [bb.x, y0 - cap, bb.x + bb.width, y0 + (k - 1) * lh] };
+    }
+    var angle = function (k) { return Math.atan2(SIDES[k][1], SIDES[k][0]); };
+    names.forEach(function (nm) {
+      var want = SIDES[nm.ar.side] ? nm.ar.side : 'e';
+      var keys = Object.keys(SIDES).sort(function (k1, k2) {
+        var d1 = Math.abs(Math.atan2(Math.sin(angle(k1) - angle(want)), Math.cos(angle(k1) - angle(want))));
+        var d2 = Math.abs(Math.atan2(Math.sin(angle(k2) - angle(want)), Math.cos(angle(k2) - angle(want))));
+        return d1 - d2;
+      });
+      var got = null;
+      for (var i = 0; i < keys.length && !got; i++) {
+        var tryIt = place(nm, keys[i]);
+        if (!blocked(tryIt.rect)) got = tryIt; else tryIt.node.remove();
+      }
+      if (!got) { got = place(nm, want); warn('name ' + nm.id, 'name of "' + nm.id + '" touches a line or a name on every side'); }
+      boxes.push(got.rect);
     });
 
-    host.insertBefore(svg, host.firstChild);
-    // first-letter side bearing (DEC-025 / DEC-033) for flush-left names
-    gNames.querySelectorAll('text[text-anchor="start"] tspan').forEach(function (ts) {
-      var pull = parseFloat(getComputedStyle(ts).getPropertyValue('--lsb-pull')) || 0;
-      ts.setAttribute('x', f(parseFloat(ts.getAttribute('x')) - pull * px(host, '--map-fs')));
-    });
     var bb = root.getBBox(), pad = gap;
     if (data.grid) {
       var gGrid = el('g', { class: 'map__grid' });

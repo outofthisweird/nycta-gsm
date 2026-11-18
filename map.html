@@ -56,7 +56,7 @@
     "g3": { "at": [12, 12],  "name": "여백", "side": "e" },
     "l1": { "at": [-1, 5],   "name": "Ledger", "side": "n", "lang": "en" },
     "l2": { "at": [16, 5],   "name": "검증", "side": "n" },
-    "l3": { "at": [24, 5],   "name": "공개", "side": "n" },
+    "l3": { "at": [23, 5],   "name": "공개", "side": "n" },
     "d1": { "at": [19, -1],  "name": "26개 원판", "side": "e" },
     "d2": { "at": [21, 10],  "name": "구운 윤곽선", "side": "e" }
   },
@@ -76,22 +76,24 @@
   </section>
 
   <section class="demo">
-    <p class="cap">역 기준 · 역은 언제나 자기 격자점에 놓이고 선이 그 점을 지나갑니다. 왼쪽: 역이 꺾이는 점에 있으면 선이 역에서 바로 꺾임. 오른쪽: 꺾는 점([x, y])을 역 사이에 두면 묵직한 곡선이 되고, 곡선은 역에 닿기 전에 끝남</p>
+    <p class="cap">역 기준 · 역은 언제나 자기 격자점에 놓이고 선이 그 점을 지나갑니다. 꺾는 점은 역 사이의 빈 점([x, y])에만 둡니다. 꺾임은 늘 정해진 반지름의 곡선이라 안쪽도 둥글고, 곡선은 역에 닿기 전에 끝납니다. 왼쪽: 한 가닥. 오른쪽: 두 가닥 묶음(같은 중심을 도는 동심원 호). 역을 꺾는 점에 두거나 곡선이 닿을 만큼 가까이 두면 콘솔에 경고가 뜨고 역은 곡선 위로 옮겨집니다</p>
     <div class="pair">
-      <figure class="map" aria-label="꺾이는 점에 놓인 역">
-<script type="application/json">
-{ "grid": true, "groups": { "g": { "color": "yellow" } },
-  "articles": { "p1": { "at": [0, 0], "name": "팝아트", "side": "n" }, "p2": { "at": [3, 0], "name": "변기", "side": "ne" },
-                "p3": { "at": [3, 3], "name": "아우라", "side": "w" }, "p4": { "at": [4, 3], "name": "동시대성", "side": "s" }, "p5": { "at": [6, 5], "name": "다음", "side": "e" } },
-  "series": [ { "id": "A", "group": "g", "path": ["p1", "p2", "p3", "p4", "p5"] } ] }
-</script>
-      </figure>
       <figure class="map" aria-label="역 사이에서 꺾이는 선">
 <script type="application/json">
 { "grid": true, "groups": { "g": { "color": "yellow" } },
   "articles": { "p1": { "at": [0, 0], "name": "팝아트", "side": "n" }, "p2": { "at": [2, 0], "name": "변기", "side": "n" },
                 "p3": { "at": [3, 2], "name": "아우라", "side": "w" }, "p4": { "at": [4, 4], "name": "동시대성", "side": "s" }, "p5": { "at": [8, 7], "name": "다음", "side": "e" } },
   "series": [ { "id": "A", "group": "g", "path": ["p1", "p2", [3, 0], "p3", [3, 4], "p4", [5, 4], "p5"] } ] }
+</script>
+      </figure>
+      <figure class="map" aria-label="역 사이에서 함께 꺾이는 두 가닥">
+<script type="application/json">
+{ "grid": true, "groups": { "g": { "color": "green" } },
+  "articles": { "p1": { "at": [0, 0], "name": "팝아트", "side": "n" }, "p2": { "at": [2, 0], "name": "변기", "side": "n" },
+                "p3": { "at": [3, 2], "name": "아우라", "side": "w" }, "p4": { "at": [4, 4], "name": "동시대성", "side": "s" }, "p5": { "at": [8, 7], "name": "다음", "side": "e" },
+                "q1": { "at": [1, 0], "name": "레디메이드", "side": "n" }, "q2": { "at": [3, 3], "name": "복제", "side": "w" }, "q3": { "at": [6.5, 5.5], "name": "원본", "side": "ne" } },
+  "series": [ { "id": "A", "group": "g", "path": ["p1", "p2", [3, 0], "p3", [3, 4], "p4", [5, 4], "p5"] },
+              { "id": "B", "group": "g", "path": [[0, 0], "q1", [3, 0], "q2", [3, 4], [5, 4], "q3"] } ] }
 </script>
       </figure>
     </div>
