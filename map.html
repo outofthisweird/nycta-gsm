@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NYCTA 1970 → Web · 노선도</title>
 <link rel="stylesheet" href="css/nycta.css">
+<script src="js/nycta.js" defer></script>
 <script src="js/nycta-map.js" defer></script>
 <script>/* Local preview font (tools/build_fonts.py helvetica). Never ship (DEC-028). file:// and localhost load it by default; ?font=albert shows the shipped font, ?font=helvetica forces the preview. */ (function(){var q=location.search,local=location.protocol==='file:'||/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);if(/[?&]font=helvetica\b/.test(q)||(local&&!/[?&]font=albert\b/.test(q)))document.write('<link rel="stylesheet" href="preview/helvetica.css">');})();</script>
 <style>
@@ -13,12 +14,13 @@
   .demo { margin: 0 0 var(--doc-space-4); }
   .cap { font-size: 12px; color: var(--c-grey); margin: 0 0 6px; letter-spacing: 0; word-spacing: normal; line-height: 1.4; }
   .lead { font-size: 15px; letter-spacing: 0; word-spacing: normal; line-height: 1.6; max-width: 62ch; margin: 0 0 var(--doc-space-3); }
+  .print-toggle { appearance: none; font: inherit; font-size: 12px; letter-spacing: 0; word-spacing: normal; color: inherit; background: none; border: 0; padding: 0; text-decoration: underline; cursor: pointer; } /* DEC-038 viewer switch, link-style (DEC-006) */
   .pair { display: flex; flex-wrap: wrap; gap: var(--doc-space-4); align-items: flex-start; }
 </style>
 </head>
 <body>
 <main>
-  <p class="cap">DEC-036 · 노선도</p>
+  <p class="cap">DEC-036 · 노선도 · <button type="button" class="print-toggle" data-print-toggle aria-pressed="false">인쇄 질감</button></p>
   <h1>노선도</h1>
   <p class="lead">아티클이 역, 시리즈가 노선입니다. 비슷한 시리즈끼리는 같은 그룹이 되어 같은 색 가닥으로 나란히 붙어 한 줄기로 달리고, 꺾일 때는 같은 중심을 도는 동심원 호로 함께 돕니다. 역은 글자 없는 검은 원이고, 그 아티클이 속한 시리즈의 가닥에만 찍힙니다. 두 그룹의 시리즈에 함께 속한 아티클은 환승역이 됩니다.</p>
 

@@ -46,3 +46,50 @@
   window.NYCTA = window.NYCTA || {};
   window.NYCTA.sizePlates = size;
 })();
+
+/* Print simulation layer (DEC-038): only with <html data-print>. Injects the ink-edge filter the CSS
+   points at (filter: url(#nycta-ink)); its strength is --print-edge in px. NYCTAPrint.update() re-reads it. */
+(function () {
+  var NS = 'http://www.w3.org/2000/svg', disp;
+  function update() {
+    if (!disp) return;
+    var v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--print-edge'));
+    disp.setAttribute('scale', isFinite(v) ? v : 1);
+  }
+  function init() {
+    if (!document.documentElement.hasAttribute('data-print') || document.getElementById('nycta-ink')) return update();
+    var svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden';
+    svg.innerHTML = '<filter id="nycta-ink" x="-2%" y="-2%" width="104%" height="104%" color-interpolation-filters="sRGB">' +
+      '<feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="7" result="t"/>' +
+      '<feDisplacementMap in="SourceGraphic" in2="t" scale="1" xChannelSelector="R" yChannelSelector="G"/></filter>';
+    document.body.insertBefore(svg, document.body.firstChild);
+    disp = svg.querySelector('feDisplacementMap');
+    update();
+  }
+  // Viewer switch: any <button data-print-toggle> turns the layer on/off; the choice is remembered per browser.
+  var KEY = 'nycta-print';
+  function set(on) {
+    var root = document.documentElement;
+    if (on) root.setAttribute('data-print', ''); else root.removeAttribute('data-print');
+    var btns = document.querySelectorAll('[data-print-toggle]');
+    for (var i = 0; i < btns.length; i++) btns[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+    init();
+  }
+  function wire() {
+    var btns = document.querySelectorAll('[data-print-toggle]');
+    if (btns.length) {
+      var saved = null;
+      try { saved = localStorage.getItem(KEY); } catch (e) {}
+      set(saved === null ? document.documentElement.hasAttribute('data-print') : saved === '1');
+    } else init();
+    for (var i = 0; i < btns.length; i++) btns[i].addEventListener('click', function () {
+      var on = !document.documentElement.hasAttribute('data-print');
+      set(on);
+      try { localStorage.setItem(KEY, on ? '1' : '0'); } catch (e) {}
+    });
+  }
+  window.NYCTAPrint = { init: init, update: update, set: set };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire); else wire();
+})();

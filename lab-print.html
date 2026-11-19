@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ko" data-print>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>인쇄 질감 실험</title>
+<link rel="stylesheet" href="css/nycta.css">
+<script src="js/nycta.js" defer></script>
+<script>(function(){var q=location.search,local=location.protocol==='file:'||/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);if(/[?&]font=helvetica\b/.test(q)||(local&&!/[?&]font=albert\b/.test(q)))document.write('<link rel="stylesheet" href="preview/helvetica.css">');})();</script>
+<style>
+  /* lab scaffolding — not part of the system */
+  body { padding: 24px; }
+  .ui, .ui * { font-family: system-ui, sans-serif; letter-spacing: 0; word-spacing: normal; font-weight: 400; }
+  .ui { font-size: 14px; line-height: 1.45; max-width: 70ch; }
+  .ui h1 { font-size: 20px; font-weight: 600; margin: 0 0 8px; }
+  .ui p { margin: 0 0 8px; font-size: 14px; }
+  .controls { display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: center; max-width: none;
+              position: sticky; top: 0; z-index: 10; background: var(--bg); padding: 10px 0; margin: 12px 0 24px; border-bottom: 1px solid #bbb; }
+  .controls label { display: flex; gap: 8px; align-items: center; white-space: nowrap; }
+  .controls :is(input, select) { all: revert; }
+  .controls output { min-width: 2.5em; font-variant-numeric: tabular-nums; }
+  section { margin: 0 0 40px; }
+  .tag { font: 12px/1.2 system-ui, sans-serif; letter-spacing: 0; word-spacing: normal; color: #666; margin: 0 0 8px; }
+  .row { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+  .doc { max-width: 34em; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="arrow" viewBox="-0.5 -0.5 1 1">
+    <path d="M -0.488 -0.1015 L 0.119 -0.1015 L -0.048 -0.269 L 0.096 -0.403 L 0.5 0 L 0.096 0.403 L -0.048 0.269 L 0.119 0.1015 L -0.488 0.1015 Z"/>
+  </symbol>
+</svg>
+
+<div class="ui">
+  <h1>인쇄 질감 실험 (DEC-038)</h1>
+  <p>켜는 사람만 쓰는 층입니다: <code>&lt;html data-print&gt;</code>. 라이트 모드에서만 적용되고, 다크 모드·고대비·강제 색·실제 인쇄에서는 꺼집니다. 가장자리 필터는 <code>js/nycta.js</code>가 넣습니다.</p>
+</div>
+
+<div class="ui controls">
+  <label><input type="checkbox" id="on" checked> 켜기</label>
+  <label>종이색
+    <select id="paper">
+      <option value="#FFFCFA">스캔 종이 반 #FFFCFA (기본)</option>
+      <option value="#FFFAF6">스캔 종이 #FFFAF6</option>
+      <option value="#FBF5EA">조금 더 따뜻하게 #FBF5EA</option>
+      <option value="#F4ECDC">오래된 종이 #F4ECDC</option>
+      <option value="#FFFFFF">흰색 #FFFFFF</option>
+    </select></label>
+  <label>섬유 <input type="range" id="grain" min="0" max="1.5" step="0.05" value="0.15"><output>0.15</output></label>
+  <label>얼룩 <input type="range" id="mottle" min="0" max="1.5" step="0.05" value="0"><output>0</output></label>
+  <label>가장자리 px <input type="range" id="edge" min="0" max="3" step="0.1" value="1.5"><output>1.5</output></label>
+  <label>망점(실험) <input type="range" id="screen" min="0" max="0.6" step="0.02" value="0"><output>0</output></label>
+</div>
+
+<main lang="en">
+  <section>
+    <p class="tag">Sign plates</p>
+    <div class="row">
+      <div class="plate sign-direction">
+        <div class="m m-center"><svg class="arrow" data-dir="up-left"><use href="#arrow"/></svg></div>
+        <div class="m m-4"><p class="t-direction trim">Downtown<br>&amp; Brooklyn</p></div>
+        <div class="m m-center"><span class="disc" data-line="1"><span>1</span></span></div>
+        <div class="m m-center"><span class="disc" data-line="2"><span>2</span></span></div>
+        <div class="m m-center"><span class="disc" data-line="3"><span>3</span></span></div>
+      </div>
+      <div class="plate sign-ident"><div class="m m-6"><p class="t-ident trim">Times Square</p></div></div>
+      <div class="plate">
+        <div class="m m-center"><svg class="arrow" data-dir="left"><use href="#arrow"/></svg></div>
+        <div class="m m-exit"><p class="t-ident trim">Exit</p></div>
+        <div class="m m-blank"></div>
+        <div class="m m-center"><svg class="arrow" data-dir="up"><use href="#arrow"/></svg></div>
+        <div class="m m-transfer m-auto"><p class="t-ident trim">Transfer</p></div>
+        <div class="m m-center"><span class="disc" data-line="A"><span>A</span></span></div>
+        <div class="m m-center"><span class="disc" data-line="E"><span>E</span></span></div>
+      </div>
+      <div class="plate">
+        <div class="m m-2"><div class="stack-g1">
+          <p class="t-info trim">Free transfer</p>
+          <p class="t-info trim">Mon–Fri 7 am to 8:10 pm</p>
+          <p class="t-info trim">Change for <span class="disc disc--inline" data-line="F"><span>F</span></span></p>
+        </div></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="tag">Discs on paper (outside plates)</p>
+    <div class="row" style="align-items:flex-end">
+      <span class="disc" data-line="B"><span>B</span></span>
+      <span class="disc" data-line="N"><span>N</span></span>
+      <span class="disc" data-line="7"><span>7</span></span>
+      <span class="disc" data-line="L"><span>L</span></span>
+      <span class="disc disc--m" data-line="6"><span>6</span></span>
+      <span class="disc disc--s" data-line="KK"><span>KK</span></span>
+    </div>
+  </section>
+
+  <section>
+    <p class="tag">Information popup (in place)</p>
+    <div class="popup" role="dialog" aria-labelledby="pp-t">
+      <div class="popup__body">
+        <span class="disc popup__disc" data-line="3" role="img" aria-label="3 train"><span>3</span></span>
+        <div class="popup__text">
+          <p id="pp-t">To Harlem–148 St</p>
+          <p>Late nights take <span class="disc disc--inline" data-line="2"><span>2</span></span> to</p>
+          <p>Times Sq–42 St for <span class="disc disc--inline" data-line="3"><span>3</span></span></p>
+          <form method="dialog"><button class="popup__close">Close</button></form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="doc">
+    <p class="tag">Document text (paper and grain only, no edge filter)</p>
+    <h2>Weekend service</h2>
+    <p>No <span class="disc disc--inline" data-line="B"><span>B</span></span> trains between Dekalb Av and Brighton Beach. Take the <span class="disc disc--inline" data-line="D"><span>D</span></span> instead.</p>
+  </section>
+</main>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  document.getElementById('on').addEventListener('change', function (e) {
+    if (e.target.checked) root.setAttribute('data-print', ''); else root.removeAttribute('data-print');
+    if (window.NYCTAPrint) NYCTAPrint.init();
+  });
+  document.getElementById('paper').addEventListener('change', function (e) { root.style.setProperty('--c-paper', e.target.value); });
+  ['grain', 'mottle', 'edge', 'screen'].forEach(function (id) {
+    var el = document.getElementById(id);
+    el.addEventListener('input', function () {
+      root.style.setProperty('--print-' + id, el.value);
+      el.nextElementSibling.value = el.value;
+      if (id === 'edge' && window.NYCTAPrint) NYCTAPrint.update();
+    });
+  });
+})();
+</script>
+</body>
+</html>
