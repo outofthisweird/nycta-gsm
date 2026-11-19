@@ -624,55 +624,50 @@ td { padding: var(--doc-space-1); border-bottom: var(--doc-rule) solid var(--fg)
 
 /* -------------------------------------------------------------------------
    14. Print simulation layer (DEC-038) — opt-in: <html data-print>
-   Off by default; a button with data-print-toggle switches it per viewer (js/nycta.js). Dark mode, high contrast, forced colours and real printing turn it off.
+   Off by default; a button with data-print-toggle switches it per viewer (js/nycta.js). Two parts: paper grain + ink edge.
+   Dark mode keeps both, mirrored (white fibre, screen blend), without the paper colour; high contrast, forced colours and real printing turn it off.
    Ink-edge filter (#nycta-ink) is injected by js/nycta.js; without the script only paper + grain apply.
    ------------------------------------------------------------------------- */
 :root[data-print] {
   --c-paper: #FFFCFA;                                   /* DEC-038, COLOR-005 | pdf p.49–57 | [설계결정] scan paper #EAE5E2 normalised to R = 255 (#FFFAF6), halfway to white */
   --c-white: var(--c-paper);                            /* DEC-038 | - | [설계결정] white type = bare paper */
   --print-grain: 0.15;                                  /* DEC-038 | - | [설계결정] fine fibre */
-  --print-mottle: 0;                                    /* DEC-038 | - | [설계결정] coarse cloudiness */
+  --print-grain-dark: 0.25;                             /* DEC-038 | - | [설계결정] fine fibre in dark mode: white specks, screen blend */
   --print-edge: 1.5;                                    /* DEC-038 | - | [설계결정] edge displacement in px (max ±0.75px), read by js/nycta.js */
-  --print-screen: 0;                                    /* DEC-038 | - | [설계결정] halftone screen, experiment */
-  --print-on: 1;
   --print-filter: url(#nycta-ink);
+  --print-grain-now: var(--print-grain);
+  --print-grain-tex: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .32 0 0 0 0 .27 0 0 0 0 .2 1.8 0 0 0 -.82'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
+  --print-grain-blend: multiply;
 }
 @media (prefers-color-scheme: dark) {
-  :root[data-print]:not([data-theme="light"]) { --c-white: #FFFFFF; --print-on: 0; --print-filter: none; } /* DEC-038 | - | [설계결정] dark mode: off */
+  :root[data-print]:not([data-theme="light"]) {         /* DEC-038, DEC-019 | - | [설계결정] dark mode: grain mirrored (light specks lift the black), ink edge kept; no paper colour */
+    --c-white: #FFFFFF;
+    --print-grain-now: var(--print-grain-dark);
+    --print-grain-tex: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 1.8 0 0 0 -.82'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
+    --print-grain-blend: screen;
+  }
 }
-:root[data-print][data-theme="dark"] { --c-white: #FFFFFF; --print-on: 0; --print-filter: none; }
-@media (prefers-contrast: more), (forced-colors: active), print {
-  :root[data-print] { --c-white: #FFFFFF; --print-on: 0; --print-filter: none; } /* DEC-038 | - | [설계결정] */
+:root[data-print][data-theme="dark"] {
+  --c-white: #FFFFFF;
+  --print-grain-now: var(--print-grain-dark);
+  --print-grain-tex: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 1.8 0 0 0 -.82'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
+  --print-grain-blend: screen;
 }
-:root[data-print]::after,
-:root[data-print] body::before,
-:root[data-print] body::after {
+:root[data-print] body::after {                         /* DEC-038 | - | [설계결정] paper: fine fibre over ink too (light: multiply, dark: screen) */
   content: "";
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 2147483646;
-}
-:root[data-print] body::after {                         /* DEC-038 | - | [설계결정] paper: fine fibre, multiplied over ink too */
-  background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .32 0 0 0 0 .27 0 0 0 0 .2 1.8 0 0 0 -.82'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E") 0 0 / 240px 240px;
-  mix-blend-mode: multiply;
-  opacity: calc(var(--print-grain) * var(--print-on));
-}
-:root[data-print]::after {                             /* DEC-038 | - | [설계결정] paper: coarse mottle */
-  background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.006' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .38 0 0 0 0 .28 1.4 0 0 0 -.62'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E") 0 0 / 600px 600px;
-  mix-blend-mode: multiply;
-  opacity: calc(var(--print-mottle) * var(--print-on));
-}
-:root[data-print] body::before {                        /* DEC-038 | - | [설계결정] halftone screen (experiment) */
-  background:
-    radial-gradient(circle, #fff 0 30%, transparent 34%) 0 0 / 3px 3px,
-    radial-gradient(circle, #fff 0 30%, transparent 34%) 1.5px 1.5px / 3px 3px;
-  mix-blend-mode: screen;
-  opacity: calc(var(--print-screen) * var(--print-on));
+  background: var(--print-grain-tex) 0 0 / 240px 240px;
+  mix-blend-mode: var(--print-grain-blend);
+  opacity: var(--print-grain-now);
 }
 :root[data-print] :is(.plate, .popup, .map__svg),
 :root[data-print] .disc:not(.plate .disc, .popup .disc) {
   filter: var(--print-filter);                          /* DEC-038, DEC-009 | - | [설계결정] ragged ink edge, sub-pixel so corners stay square */
+}
+@media (prefers-contrast: more), (forced-colors: active), print {
+  :root[data-print] { --c-white: #FFFFFF; --print-filter: none; }  /* DEC-038 | - | [설계결정] whole layer off */
+  :root[data-print] body::after { display: none; }
 }

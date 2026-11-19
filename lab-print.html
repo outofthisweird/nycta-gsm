@@ -34,11 +34,17 @@
 
 <div class="ui">
   <h1>인쇄 질감 실험 (DEC-038)</h1>
-  <p>켜는 사람만 쓰는 층입니다: <code>&lt;html data-print&gt;</code>. 라이트 모드에서만 적용되고, 다크 모드·고대비·강제 색·실제 인쇄에서는 꺼집니다. 가장자리 필터는 <code>js/nycta.js</code>가 넣습니다.</p>
+  <p>켜는 사람만 쓰는 층입니다: <code>&lt;html data-print&gt;</code>. 종이 섬유와 잉크 가장자리 두 가지입니다. 다크 모드에서는 종이색 없이 섬유가 흰 점(screen)으로 바뀌고 가장자리는 그대로이며, 고대비·강제 색·실제 인쇄에서는 꺼집니다. 가장자리 필터는 <code>js/nycta.js</code>가 넣습니다.</p>
 </div>
 
 <div class="ui controls">
   <label><input type="checkbox" id="on" checked> 켜기</label>
+  <label>모드
+    <select id="theme">
+      <option value="">시스템</option>
+      <option value="light">라이트</option>
+      <option value="dark">다크</option>
+    </select></label>
   <label>종이색
     <select id="paper">
       <option value="#FFFCFA">스캔 종이 반 #FFFCFA (기본)</option>
@@ -48,9 +54,8 @@
       <option value="#FFFFFF">흰색 #FFFFFF</option>
     </select></label>
   <label>섬유 <input type="range" id="grain" min="0" max="1.5" step="0.05" value="0.15"><output>0.15</output></label>
-  <label>얼룩 <input type="range" id="mottle" min="0" max="1.5" step="0.05" value="0"><output>0</output></label>
+  <label>섬유(다크) <input type="range" id="grain-dark" min="0" max="1.5" step="0.05" value="0.25"><output>0.25</output></label>
   <label>가장자리 px <input type="range" id="edge" min="0" max="3" step="0.1" value="1.5"><output>1.5</output></label>
-  <label>망점(실험) <input type="range" id="screen" min="0" max="0.6" step="0.02" value="0"><output>0</output></label>
 </div>
 
 <main lang="en">
@@ -125,8 +130,11 @@
     if (e.target.checked) root.setAttribute('data-print', ''); else root.removeAttribute('data-print');
     if (window.NYCTAPrint) NYCTAPrint.init();
   });
+  document.getElementById('theme').addEventListener('change', function (e) {
+    if (e.target.value) root.setAttribute('data-theme', e.target.value); else root.removeAttribute('data-theme');
+  });
   document.getElementById('paper').addEventListener('change', function (e) { root.style.setProperty('--c-paper', e.target.value); });
-  ['grain', 'mottle', 'edge', 'screen'].forEach(function (id) {
+  ['grain', 'grain-dark', 'edge'].forEach(function (id) {
     var el = document.getElementById(id);
     el.addEventListener('input', function () {
       root.style.setProperty('--print-' + id, el.value);
