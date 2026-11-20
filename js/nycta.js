@@ -48,13 +48,26 @@
 })();
 
 /* Print simulation layer (DEC-038): only with <html data-print>. Injects the ink-edge filter the CSS
-   points at (filter: url(#nycta-ink)); its strength is --print-edge in px. NYCTAPrint.update() re-reads it. */
+   points at (filter: url(#nycta-ink)); its strength is --print-edge in px. NYCTAPrint.update() re-reads it.
+   Zoom (DEC-039): the texture is held at screen-pixel size, so it reads the same at any zoom. z = device px per
+   CSS px / 2 (1 = 100 % on a retina screen, where the values were tuned). Noise frequency follows z (bumps stay
+   ~1.8 device px, never finer than the screen can show, never blown up into waves); the edge displacement follows
+   1/z when zoomed in (stays ±1.5 device px) but stays in CSS px when zoomed out, so small type is not shredded.
+   The grain tile is sized the same way (--print-grain-size). */
 (function () {
-  var NS = 'http://www.w3.org/2000/svg', disp;
+  var NS = 'http://www.w3.org/2000/svg', disp, turb, EDGE_F = 1.1, GRAIN = 240;
+  function zoom() {
+    var vv = window.visualViewport, z = (window.devicePixelRatio || 1) * (vv && vv.scale ? vv.scale : 1) / 2;
+    return z > 0 ? z : 1;
+  }
   function update() {
+    var root = document.documentElement, z = zoom();
+    root.style.setProperty('--print-grain-size', (GRAIN / z).toFixed(2) + 'px');
     if (!disp) return;
-    var v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--print-edge'));
-    disp.setAttribute('scale', isFinite(v) ? v : 1);
+    var v = parseFloat(getComputedStyle(root).getPropertyValue('--print-edge'));
+    if (!isFinite(v)) v = 1;
+    disp.setAttribute('scale', (v * Math.min(1, 1 / z)).toFixed(3));
+    turb.setAttribute('baseFrequency', (EDGE_F * z).toFixed(3));
   }
   function init() {
     if (!document.documentElement.hasAttribute('data-print') || document.getElementById('nycta-ink')) return update();
@@ -66,8 +79,18 @@
       '<feDisplacementMap in="SourceGraphic" in2="t" scale="1" xChannelSelector="R" yChannelSelector="G"/></filter>';
     document.body.insertBefore(svg, document.body.firstChild);
     disp = svg.querySelector('feDisplacementMap');
+    turb = svg.querySelector('feTurbulence');
     update();
   }
+  // Browser zoom changes devicePixelRatio and fires resize; pinch zoom changes visualViewport.scale.
+  var queued = false;
+  function onZoom() {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(function () { queued = false; if (document.documentElement.hasAttribute('data-print')) update(); });
+  }
+  window.addEventListener('resize', onZoom);
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', onZoom);
   // Viewer switch: any <button data-print-toggle> turns the layer on/off; the choice is remembered per browser.
   var KEY = 'nycta-print';
   function set(on) {

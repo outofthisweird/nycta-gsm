@@ -633,7 +633,7 @@ td { padding: var(--doc-space-1); border-bottom: var(--doc-rule) solid var(--fg)
   --c-white: var(--c-paper);                            /* DEC-038 | - | [설계결정] white type = bare paper */
   --print-grain: 0.15;                                  /* DEC-038 | - | [설계결정] fine fibre */
   --print-grain-dark: 0.25;                             /* DEC-038 | - | [설계결정] fine fibre in dark mode: white specks, screen blend */
-  --print-edge: 1.5;                                    /* DEC-038 | - | [설계결정] edge displacement in px (max ±0.75px), read by js/nycta.js */
+  --print-edge: 1.5;                                    /* DEC-038, DEC-039 | - | [설계결정] edge displacement in px at 100 % zoom (max ±0.75px), read by js/nycta.js */
   --print-filter: url(#nycta-ink);
   --print-grain-now: var(--print-grain);
   --print-grain-tex: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .32 0 0 0 0 .27 0 0 0 0 .2 1.8 0 0 0 -.82'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
@@ -659,7 +659,7 @@ td { padding: var(--doc-space-1); border-bottom: var(--doc-rule) solid var(--fg)
   inset: 0;
   pointer-events: none;
   z-index: 2147483646;
-  background: var(--print-grain-tex) 0 0 / 240px 240px;
+  background: var(--print-grain-tex) 0 0 / var(--print-grain-size, 240px) var(--print-grain-size, 240px); /* DEC-039 | - | [설계결정] tile held at screen-pixel size by js/nycta.js */
   mix-blend-mode: var(--print-grain-blend);
   opacity: var(--print-grain-now);
 }
