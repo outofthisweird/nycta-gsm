@@ -1,4 +1,4 @@
-/* NYCTA 1970 → Web — plate widths (DEC-030)
+/* NYCTA 1970 → Web — first-letter pull (DEC-043) and plate widths (DEC-030)
    Identification plates hug the name, then round up to ½ ft; when that leaves less than 1in of room
    (the name already ends on a ½ ft line), one more ½ ft. The result in ft depends only on the font
    and weight, not on the module size, so it is measured once and set as --plate-w = module × ft.
@@ -22,7 +22,45 @@
     return ft;
   }
 
+  /* First-letter pull (DEC-043): each line-starting element is pulled left by its own first glyph's side
+     bearing (minus the master inset), read from the --lsb-table token the font build writes. Without this
+     script every element keeps the one straight-stem value --lsb-comp (DEC-025). Runs before the plate
+     widths are measured, because the pull changes the name's hug width. */
+  var PULLED = '.t-ident, .t-direction, .t-info, h1, .h1, h2, .h2, h3, .h3, .compact__title, .compact__item, .popup__text > *';
+  var tableSrc = null, table = {};
+
+  function readTable() {
+    var raw = getComputedStyle(document.documentElement).getPropertyValue('--lsb-table').trim().replace(/^["']|["']$/g, '');
+    if (raw === tableSrc) return;
+    tableSrc = raw; table = {};
+    raw.split(/\s+/).forEach(function (t) { if (t.length > 1) table[t.charAt(0)] = parseFloat(t.slice(1)); });
+  }
+
+  function firstChar(el) {
+    var w = document.createTreeWalker(el, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT), n;
+    while ((n = w.nextNode())) {
+      if (n.nodeType === 1) {
+        if (n.matches('.disc, svg, img, .arrow')) return null;   // line opens with a symbol: leave it
+        continue;
+      }
+      var t = n.nodeValue.replace(/^\s+/, '');
+      if (t) return t.charAt(0);
+    }
+    return null;
+  }
+
+  function pull() {
+    readTable();
+    var els = document.querySelectorAll(PULLED);
+    for (var i = 0; i < els.length; i++) {
+      var c = firstChar(els[i]), v = c && table[c];
+      if (typeof v === 'number' && !isNaN(v)) els[i].style.setProperty('--lsb-pull', v + 'em');
+      else els[i].style.removeProperty('--lsb-pull');
+    }
+  }
+
   function size() {
+    pull();
     var cells = document.querySelectorAll('.sign-ident > .m');
     for (var i = 0; i < cells.length; i++) cells[i].style.removeProperty('--plate-w');
     for (var j = 0; j < cells.length; j++) {
@@ -45,6 +83,7 @@
   }
   window.NYCTA = window.NYCTA || {};
   window.NYCTA.sizePlates = size;
+  window.NYCTA.pullFirstLetters = pull;
 })();
 
 /* Print simulation layer (DEC-038): only with <html data-print>. Injects the ink-edge filter the CSS

@@ -43,6 +43,7 @@
   --ws: -0.1485em;                                      /* DEC-018, TYPE-021 | pdf p.62,65 | [변환] word gap = 0.34 cap ink-to-ink (manual samples '& Brooklyn', 'Broadway Nassau') */
   --lsb-comp: 0.064em;                                  /* DEC-025 | pdf p.62,66 | [변환] straight-stem capitals (B D E F H I K L M N P R U): font side bearing − master inset; round letters end up ≈0.02em left (optical overshoot) */
   --ws-ko: -0.0737em;                                   /* DEC-033, DEC-018 | - | [변환] Hangul word gap ink-to-ink = 0.34 × 1.1 cap */
+  --lsb-table: "A0.0022 B0.0642 C0.0398 D0.0638 E0.0776 F0.0622 G0.0392 H0.0628 I0.064 J0.0437 K0.0624 L0.0634 M0.0669 N0.0622 O0.0371 P0.069 Q0.0359 R0.0682 S0.042 T0.0281 U0.0569 V0.021 W0.0186 X0.043 Y0.0183 Z0.0438 a0.0371 b0.0561 c0.0394 d0.0316 e0.0371 f0.0325 g0.0394 h0.056 i0.0563 j-0.0441 k0.0618 l0.0552 m0.0554 n0.055 o0.0423 p0.0653 q0.0388 r0.0565 s0.0404 t0.0222 u0.0448 v0.0084 w0.0206 x0.0218 y-0.0028 z0.0336 00.0547 10.032 20.0394 30.0465 40.0326 50.0557 60.0519 70.0244 80.0496 90.0422 &0.0559";                                     /* DEC-043, DEC-025 | - | [변환] per first letter pull (em), written by tools/build_fonts.py --write-css, applied by js/nycta.js */
   --lsb-comp-ko: 0.0199em;                              /* DEC-033, DEC-025 | - | [변환] median Hangul left side bearing (after −1 unit tracking) */
   --trim-k: 0.35;                                       /* GRID-003 | - | [변환] (ascent+descent)/2 − (ascent − cap) of the web font */
 
