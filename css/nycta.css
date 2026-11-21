@@ -551,14 +551,14 @@ td { padding: var(--doc-space-1); border-bottom: var(--doc-rule) solid var(--fg)
   --font-weight: var(--font-weight-dark);               /* DEC-031, DEC-019 | - | [설계결정] white type → irradiation weight */
   color: var(--bg);                                     /* DEC-031, SIGN-016 | pdf p.82 | [설계결정] reverse of the page */
   background:
-    linear-gradient(var(--bg), var(--bg)) 0 calc(var(--p-in) * 0.5) / 100% var(--p-rule) no-repeat, /* DEC-031 | - | [설계결정] rule ½in below the top edge */
+    linear-gradient(var(--bg), var(--bg)) 0 calc(var(--p-in) * 1.5) / 100% var(--p-rule) no-repeat, /* DEC-031, DEC-040 | - | [설계결정] rule 1½in below the top edge: 1½ + ⅛in = the 1⅝in band (GRID-013) */
     var(--fg);
   font-size: var(--p-fs);                               /* DEC-031, TYPE-007 | - | [설계결정] */
   font-weight: var(--font-weight);
   line-height: var(--lh-g1);                            /* GRID-007 | pdf p.11 | [변환] */
   border: 0;
   margin: auto;                                         /* DEC-031 | - | [설계결정] centred when modal */
-  padding: calc(var(--p-in) * 1.125) calc(var(--p-in) * 0.5) calc(var(--p-in) * (0.5 + 0.235 * 1.375)); /* DEC-031, GRID-003, GRID-011 | - | [설계결정] top ½ + ⅛ + ½in; sides ½in; bottom ½in below the descender guide (0.235 cap) */
+  padding: calc(var(--p-in) * 2.125) calc(var(--p-in) * 0.5) calc(var(--p-in) * (0.5 + 0.235 * 1.375)); /* DEC-031, GRID-003, GRID-011 | - | [설계결정] top 1½ + ⅛ + ½in (DEC-040); sides ½in; bottom ½in below the descender guide (0.235 cap) */
   width: max-content;
   max-inline-size: min(calc(var(--p-in) * 48), calc(100% - 2 * var(--doc-space-3))); /* DEC-031 | - | [설계결정] ≤ 4 ft */
   max-block-size: calc(100% - 2 * var(--doc-space-3));
