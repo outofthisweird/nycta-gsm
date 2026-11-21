@@ -81,7 +81,8 @@
   --c-lightblue:  #02C6F4;                              /* COLOR-005 | pdf p.54 | [이미지판독] PMS 312 */
   --c-blue:       #0262D3;                              /* COLOR-005 | pdf p.55 | [이미지판독] PMS 300 */
   --c-grey:       #9A9392;                              /* COLOR-005, COLOR-007, DEC-027 | pdf p.57,88 | [설계결정] scan #9E9897 darkened to 3:1 with white */
-  --c-red-text:   #E72400;                              /* DEC-026 | - | [설계결정] scan red darkened (same hue) to 4.5:1 on white, small red text only */
+  --c-red-text-light: #E72400;                          /* DEC-026 | - | [설계결정] scan red darkened (same hue) to 4.5:1 on white, small red text only */
+  --c-red-text:   var(--c-red-text-light);              /* DEC-026, DEC-041 | - | [설계결정] dark mode swaps it; plates keep the light value */
 
   /* semantic (swapped in dark mode, DEC-019) */
   --fg: var(--c-black);                                 /* COLOR-009 | pdf p.65 | [확정] black on white */
@@ -257,6 +258,24 @@ p { margin: 0 0 var(--doc-space-3); }
   width: max-content;                                   /* DEC-023 | - | [설계결정] the whole plate (field + band) sticks out when wider than its container; */
   min-width: 0;                                         /*   no max-width, or the field and band stop at the container while the cells run on */
   overflow: visible;                                    /* DEC-023 | - | [설계결정] plates never scroll inside; a plate wider than the screen sticks out */
+}
+/* Dark mode: plates are not inverted. They keep the light sign (white field, black band and type, light weight)
+   and get a 1px white ring so the black band does not melt into the black page — DEC-041 | - | [설계결정] */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .plate {
+    --fg: var(--c-black); --bg: var(--c-white);         /* DEC-041 | - | [설계결정] no swap inside the plate */
+    --font-weight: var(--font-weight-light);            /* DEC-041, DEC-019 | - | [설계결정] black type on white → no irradiation offset */
+    --c-mandatory: var(--c-red-text-light);             /* DEC-041, DEC-026 | - | [설계결정] red text on the white field */
+    font-weight: var(--font-weight);
+    box-shadow: 0 0 0 1px var(--c-white);               /* DEC-041 | - | [설계결정] white ring, like the black-disc ring (DEC-019) */
+  }
+}
+:root[data-theme="dark"] .plate {
+  --fg: var(--c-black); --bg: var(--c-white);           /* DEC-041 */
+  --font-weight: var(--font-weight-light);              /* DEC-041 */
+  --c-mandatory: var(--c-red-text-light);               /* DEC-041 */
+  font-weight: var(--font-weight);
+  box-shadow: 0 0 0 1px var(--c-white);                 /* DEC-041 */
 }
 .m {                                                    /* GRID-012 | pdf p.64 | [확정] 1 ft module cell, field 12in */
   flex: 0 0 auto;
@@ -596,10 +615,13 @@ td { padding: var(--doc-space-1); border-bottom: var(--doc-rule) solid var(--fg)
 /* black discs on the black field get the dark-mode ring — DEC-019, DEC-031 | - | [설계결정] */
 .popup .disc:is([data-line="5"],[data-line="B"],[data-line="LL"],[data-line="QJ"]) { box-shadow: 0 0 0 1px var(--bg); }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .popup { --font-weight: var(--font-weight-light); } /* DEC-031 | - | [설계결정] black type on white */
+  :root:not([data-theme="light"]) .popup {             /* DEC-041, DEC-031 | - | [설계결정] not inverted: stays white on black (dark weight kept) + white ring */
+    --fg: var(--c-black); --bg: var(--c-white);
+    box-shadow: 0 0 0 1px var(--c-white);
+  }
   :root:not([data-theme="light"]) .popup::backdrop { background: rgb(0 0 0 / 0.8); }
 }
-:root[data-theme="dark"] .popup { --font-weight: var(--font-weight-light); }
+:root[data-theme="dark"] .popup { --fg: var(--c-black); --bg: var(--c-white); box-shadow: 0 0 0 1px var(--c-white); } /* DEC-041 */
 :root[data-theme="dark"] .popup::backdrop { background: rgb(0 0 0 / 0.8); }
 
 /* -------------------------------------------------------------------------
