@@ -48,40 +48,13 @@
 
   /* --- module (sign scale) --- */
   --module: clamp(40px, 10vw, 97.75px);                 /* DEC-001, DEC-002 | - | [변환] 1rem × 0.700 × 12 / 1.375 = 97.75px max */
-  --in: calc(var(--module) / 12);                       /* GRID-002 | pdf p.9–11 | [변환] module = 12in */
-
-  /* cap heights (TYPE-004: size = UPPER CASE X height) */
-  --cap-l: calc(var(--in) * 9);                         /* TYPE-005 | pdf p.7–9 | [이미지판독] identification / Exit / Transfer */
-  --cap-m: calc(var(--in) * 4.25);                      /* TYPE-006 | pdf p.7,8,10 | [이미지판독] directional */
-  --cap-s: calc(var(--in) * 1.375);                     /* TYPE-007 | pdf p.7,8,11 | [이미지판독] informational */
-  --fs-l: calc(var(--cap-l) / var(--cap-em));           /* TYPE-005 | - | [변환] cap / capEm */
-  --fs-m: calc(var(--cap-m) / var(--cap-em));           /* TYPE-006 | - | [변환] cap / capEm */
-  --fs-s: max(12px, calc(var(--cap-s) / var(--cap-em))); /* TYPE-007, DEC-016 | - | [변환] cap / capEm, 12px floor [설계결정] */
-
-  /* space units (TYPE-026: 1 unit = cap / 36) — reference only; the pair matrix is applied inside the font (DEC-024) */
-  --unit-l: calc(var(--cap-l) / 36);                    /* TYPE-026 | pdf p.104,116 | [이미지판독] */
-  --unit-m: calc(var(--cap-m) / 36);                    /* TYPE-026 | pdf p.158 | [이미지판독] */
-  --unit-s: calc(var(--cap-s) / 36);                    /* TYPE-026 | pdf p.174 | [이미지판독] */
 
   /* line heights (font-size units) = pitch / cap × capEm */
   --lh-g2: calc(5.625 / 4.25 * var(--cap-em));          /* GRID-006 | pdf p.10 | [변환] pitch 5 5/8in → 0.9265 */
   --lh-g1: calc(1.875 / 1.375 * var(--cap-em));         /* GRID-007 | pdf p.11 | [변환] pitch 1 7/8in → 0.9545 */
   --lh-body: 1.5;                                       /* DEC-020 | - | [설계결정] long-form text only */
 
-  /* spacing */
-  --space-margin: calc(var(--in) * 0.5);                /* GRID-003, GRID-004 | pdf p.9–11 | [이미지판독] ½in top/left */
-  --space-gap-g1: calc(var(--in) * 0.5);                /* GRID-007 | pdf p.11 | [이미지판독] baseline → next cap line */
-  --space-gap-g2: calc(var(--in) * 1.375);              /* GRID-006 | pdf p.10 | [이미지판독] */
-  --space-disc-text: calc(var(--in) * 0.5);             /* GRID-009 | pdf p.11 | [이미지판독] */
-
-  /* strokes */
-  --stroke-band: calc(var(--in) * 1.625);               /* GRID-013 | pdf p.64 | [이미지판독] black band 1 5/8in */
-  --stroke-divider: max(1px, calc(var(--in) * 0.125));  /* SIGN-023 | pdf p.88 | [확정] 1/8in divider line */
-
-  /* discs */
-  --disc-l: calc(var(--in) * 11);                       /* DISC-001, GRID-016 | pdf p.14,65 | [이미지판독] 11in in 12in module */
-  --disc-m: calc(var(--in) * 5.5);                      /* DISC-001 | pdf p.14 | [이미지판독] */
-  --disc-s: calc(var(--in) * 1.6875);                   /* DISC-001, GRID-008 | pdf p.11,14 | [이미지판독] 1 11/16in */
+  /* discs (sizes in the module rule below) */
   --disc-glyph: 0.408;                                  /* DISC-004, DISC-007 | pdf p.15–40 | [이미지판독] glyph cap / D, median of 26 masters */
 
   /* --- document scale (DEC-002): body = Information tier at 1rem --- */
@@ -121,6 +94,40 @@
   --c-reverse-bg: var(--c-grey);                        /* COLOR-007 | pdf p.88,92 | [확정] 'Subway' / 'Exit only' reverse */
 
   color-scheme: light dark;
+}
+/* Everything measured in the module (sign scale). Declared again on every element that sets its own --module, or the
+   values arrive already computed from :root and only the cells (.m) follow the new module, not the type, rules or discs.
+   DEC-016, DEC-002 | - | [설계결정] .compact and .module-scope (any element that sets --module) recompute them */
+:root, .compact, .module-scope {
+  --in: calc(var(--module) / 12);                       /* GRID-002 | pdf p.9–11 | [변환] module = 12in */
+
+  /* cap heights (TYPE-004: size = UPPER CASE X height) */
+  --cap-l: calc(var(--in) * 9);                         /* TYPE-005 | pdf p.7–9 | [이미지판독] identification / Exit / Transfer */
+  --cap-m: calc(var(--in) * 4.25);                      /* TYPE-006 | pdf p.7,8,10 | [이미지판독] directional */
+  --cap-s: calc(var(--in) * 1.375);                     /* TYPE-007 | pdf p.7,8,11 | [이미지판독] informational */
+  --fs-l: calc(var(--cap-l) / var(--cap-em));           /* TYPE-005 | - | [변환] cap / capEm */
+  --fs-m: calc(var(--cap-m) / var(--cap-em));           /* TYPE-006 | - | [변환] cap / capEm */
+  --fs-s: max(12px, calc(var(--cap-s) / var(--cap-em))); /* TYPE-007, DEC-016 | - | [변환] cap / capEm, 12px floor [설계결정] */
+
+  /* space units (TYPE-026: 1 unit = cap / 36) — reference only; the pair matrix is applied inside the font (DEC-024) */
+  --unit-l: calc(var(--cap-l) / 36);                    /* TYPE-026 | pdf p.104,116 | [이미지판독] */
+  --unit-m: calc(var(--cap-m) / 36);                    /* TYPE-026 | pdf p.158 | [이미지판독] */
+  --unit-s: calc(var(--cap-s) / 36);                    /* TYPE-026 | pdf p.174 | [이미지판독] */
+
+  /* spacing */
+  --space-margin: calc(var(--in) * 0.5);                /* GRID-003, GRID-004 | pdf p.9–11 | [이미지판독] ½in top/left */
+  --space-gap-g1: calc(var(--in) * 0.5);                /* GRID-007 | pdf p.11 | [이미지판독] baseline → next cap line */
+  --space-gap-g2: calc(var(--in) * 1.375);              /* GRID-006 | pdf p.10 | [이미지판독] */
+  --space-disc-text: calc(var(--in) * 0.5);             /* GRID-009 | pdf p.11 | [이미지판독] */
+
+  /* strokes */
+  --stroke-band: calc(var(--in) * 1.625);               /* GRID-013 | pdf p.64 | [이미지판독] black band 1 5/8in */
+  --stroke-divider: max(1px, calc(var(--in) * 0.125));  /* SIGN-023 | pdf p.88 | [확정] 1/8in divider line */
+
+  /* discs */
+  --disc-l: calc(var(--in) * 11);                       /* DISC-001, GRID-016 | pdf p.14,65 | [이미지판독] 11in in 12in module */
+  --disc-m: calc(var(--in) * 5.5);                      /* DISC-001 | pdf p.14 | [이미지판독] */
+  --disc-s: calc(var(--in) * 1.6875);                   /* DISC-001, GRID-008 | pdf p.11,14 | [이미지판독] 1 11/16in */
 }
 
 /* -------------------------------------------------------------------------
