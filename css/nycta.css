@@ -258,16 +258,17 @@ p { margin: 0 0 var(--doc-space-3); }
   width: max-content;                                   /* DEC-023 | - | [설계결정] the whole plate (field + band) sticks out when wider than its container; */
   min-width: 0;                                         /*   no max-width, or the field and band stop at the container while the cells run on */
   overflow: visible;                                    /* DEC-023 | - | [설계결정] plates never scroll inside; a plate wider than the screen sticks out */
+  box-shadow: 0 0 0 0.5px var(--c-black);               /* DEC-041 | - | [설계결정] light mode: 0.5px black ring so the white field keeps its edge on the white page (dark mode: white ring) */
 }
 /* Dark mode: plates are not inverted. They keep the light sign (white field, black band and type, light weight)
-   and get a 1px white ring so the black band does not melt into the black page — DEC-041 | - | [설계결정] */
+   and swap the black ring for a 0.5px white ring so the black band does not melt into the black page — DEC-041 | - | [설계결정] */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .plate {
     --fg: var(--c-black); --bg: var(--c-white);         /* DEC-041 | - | [설계결정] no swap inside the plate */
     --font-weight: var(--font-weight-light);            /* DEC-041, DEC-019 | - | [설계결정] black type on white → no irradiation offset */
     --c-mandatory: var(--c-red-text-light);             /* DEC-041, DEC-026 | - | [설계결정] red text on the white field */
     font-weight: var(--font-weight);
-    box-shadow: 0 0 0 1px var(--c-white);               /* DEC-041 | - | [설계결정] white ring, like the black-disc ring (DEC-019) */
+    box-shadow: 0 0 0 0.5px var(--c-white);               /* DEC-041 | - | [설계결정] white ring, like the black-disc ring (DEC-019) */
   }
 }
 :root[data-theme="dark"] .plate {
@@ -275,7 +276,7 @@ p { margin: 0 0 var(--doc-space-3); }
   --font-weight: var(--font-weight-light);              /* DEC-041 */
   --c-mandatory: var(--c-red-text-light);               /* DEC-041 */
   font-weight: var(--font-weight);
-  box-shadow: 0 0 0 1px var(--c-white);                 /* DEC-041 */
+  box-shadow: 0 0 0 0.5px var(--c-white);                 /* DEC-041 */
 }
 .m {                                                    /* GRID-012 | pdf p.64 | [확정] 1 ft module cell, field 12in */
   flex: 0 0 auto;
@@ -414,9 +415,9 @@ p { margin: 0 0 var(--doc-space-3); }
 
 /* black disc ring in dark mode — DEC-019 | - | [설계결정] */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .disc:is([data-line="5"],[data-line="B"],[data-line="LL"],[data-line="QJ"]) { box-shadow: 0 0 0 1px var(--c-white); }
+  :root:not([data-theme="light"]) .disc:is([data-line="5"],[data-line="B"],[data-line="LL"],[data-line="QJ"]) { box-shadow: 0 0 0 0.5px var(--c-white); }
 }
-:root[data-theme="dark"] .disc:is([data-line="5"],[data-line="B"],[data-line="LL"],[data-line="QJ"]) { box-shadow: 0 0 0 1px var(--c-white); }
+:root[data-theme="dark"] .disc:is([data-line="5"],[data-line="B"],[data-line="LL"],[data-line="QJ"]) { box-shadow: 0 0 0 0.5px var(--c-white); }
 
 /* disc row order: alphabetical, then numerical — DISC-002 | pdf p.14 | [확정] (author must order markup) */
 .discs { display: inline-flex; gap: 0; }                /* SIGN-003 | pdf p.62 | [이미지판독] each disc in its own module */
@@ -567,22 +568,24 @@ td { padding: var(--doc-space-1); border-bottom: var(--doc-rule) solid var(--fg)
   --p-fs: var(--popup-fs, var(--doc-fs-s));            /* DEC-031 | - | [설계결정] Information tier 1rem; --popup-fs scales the whole popup */
   --p-in: calc(var(--p-fs) * var(--cap-em) / 1.375);   /* DEC-031, DEC-002 | - | [변환] cap = 1 3/8in */
   --p-rule: max(1px, calc(var(--p-in) * 0.125));        /* DEC-031, SIGN-023 | pdf p.88 | [변환] 1/8in rule */
-  --font-weight: var(--font-weight-dark);               /* DEC-031, DEC-019 | - | [설계결정] white type → irradiation weight */
-  color: var(--bg);                                     /* DEC-031, SIGN-016 | pdf p.82 | [설계결정] reverse of the page */
+  --fg: var(--c-black); --bg: var(--c-white);           /* DEC-042 | - | [설계결정] a plate: black band over a white field, in both themes (DEC-041) */
+  --font-weight: var(--font-weight-light);              /* DEC-042, DEC-019 | - | [설계결정] black type on white */
+  --c-mandatory: var(--c-red-text-light);               /* DEC-042, DEC-026 | - | [설계결정] */
+  color: var(--fg);                                     /* DEC-042, COLOR-009 | pdf p.65 | [설계결정] black on white, like .plate */
   background:
-    linear-gradient(var(--bg), var(--bg)) 0 calc(var(--p-in) * 1.5) / 100% var(--p-rule) no-repeat, /* DEC-031, DEC-040 | - | [설계결정] rule 1½in below the top edge: 1½ + ⅛in = the 1⅝in band (GRID-013) */
-    var(--fg);
+    linear-gradient(var(--fg), var(--fg)) 0 0 / 100% calc(var(--p-in) * 1.625) no-repeat, /* DEC-042, GRID-013 | pdf p.64 | [변환] black band 1⅝in at the top edge */
+    var(--bg);
   font-size: var(--p-fs);                               /* DEC-031, TYPE-007 | - | [설계결정] */
   font-weight: var(--font-weight);
   line-height: var(--lh-g1);                            /* GRID-007 | pdf p.11 | [변환] */
   border: 0;
   margin: auto;                                         /* DEC-031 | - | [설계결정] centred when modal */
-  padding: calc(var(--p-in) * 2.125) calc(var(--p-in) * 0.5) calc(var(--p-in) * (0.5 + 0.235 * 1.375)); /* DEC-031, GRID-003, GRID-011 | - | [설계결정] top 1½ + ⅛ + ½in (DEC-040); sides ½in; bottom ½in below the descender guide (0.235 cap) */
+  padding: calc(var(--p-in) * 2.125) calc(var(--p-in) * 0.5) calc(var(--p-in) * (0.5 + 0.235 * 1.375)); /* DEC-042, GRID-003, GRID-011, GRID-013 | - | [설계결정] top = band 1⅝ + ½in margin; sides ½in; bottom ½in below the descender guide (0.235 cap) */
   width: max-content;
   max-inline-size: min(calc(var(--p-in) * 48), calc(100% - 2 * var(--doc-space-3))); /* DEC-031 | - | [설계결정] ≤ 4 ft */
   max-block-size: calc(100% - 2 * var(--doc-space-3));
   overflow: auto;
-  box-shadow: none;
+  box-shadow: 0 0 0 0.5px var(--c-black);               /* DEC-041, DEC-042 | - | [설계결정] light mode: 0.5px black ring (dark mode: white ring) */
 }
 .popup:not(dialog), dialog.popup[open] { display: block; }
 .popup::backdrop { background: rgb(255 255 255 / 0.8); } /* DEC-031 | - | [설계결정] page colour at 80% */
@@ -612,16 +615,12 @@ td { padding: var(--doc-space-1); border-bottom: var(--doc-rule) solid var(--fg)
   text-underline-offset: 0.18em;
   cursor: pointer;
 }
-/* black discs on the black field get the dark-mode ring — DEC-019, DEC-031 | - | [설계결정] */
-.popup .disc:is([data-line="5"],[data-line="B"],[data-line="LL"],[data-line="QJ"]) { box-shadow: 0 0 0 1px var(--bg); }
+/* dark mode: not inverted (colours fixed above), 0.5px white ring like .plate — DEC-041, DEC-042 | - | [설계결정] */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .popup {             /* DEC-041, DEC-031 | - | [설계결정] not inverted: stays white on black (dark weight kept) + white ring */
-    --fg: var(--c-black); --bg: var(--c-white);
-    box-shadow: 0 0 0 1px var(--c-white);
-  }
+  :root:not([data-theme="light"]) .popup { box-shadow: 0 0 0 0.5px var(--c-white); } /* DEC-041 */
   :root:not([data-theme="light"]) .popup::backdrop { background: rgb(0 0 0 / 0.8); }
 }
-:root[data-theme="dark"] .popup { --fg: var(--c-black); --bg: var(--c-white); box-shadow: 0 0 0 1px var(--c-white); } /* DEC-041 */
+:root[data-theme="dark"] .popup { box-shadow: 0 0 0 0.5px var(--c-white); } /* DEC-041 */
 :root[data-theme="dark"] .popup::backdrop { background: rgb(0 0 0 / 0.8); }
 
 /* -------------------------------------------------------------------------
