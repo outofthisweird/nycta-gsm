@@ -503,26 +503,25 @@ a {                                                     /* DEC-006 | - | [설계
 :focus:not(:focus-visible) { outline: none; }           /* DEC-008 | - | [설계결정] never on mouse/touch */
 :focus-visible { outline: 1px solid currentColor; outline-offset: 2px; } /* DEC-008 | - | [설계결정] minimal */
 
-.btn, button {                                          /* DEC-007 | - | [설계결정] white plate + top band */
+.btn, button {                                          /* DEC-007, DEC-044 | - | [설계결정] white plate + top band, framed like inputs */
   appearance: none;                                     /* DEC-009 */
   font: inherit;
   letter-spacing: inherit;
   word-spacing: inherit;
   color: var(--fg);
   background: var(--bg);
-  border: 0;
+  border: var(--doc-rule) solid var(--fg);              /* DEC-044 | - | [설계결정] side + bottom rules, as DEC-009 */
   border-top: var(--doc-band) solid var(--fg);
-  padding: var(--doc-space-1) var(--doc-space-1) var(--doc-space-1) 0;
+  padding: var(--doc-space-1);                          /* DEC-044 | - | [설계결정] label off the left rule */
   line-height: var(--lh-g1);
   cursor: pointer;
   text-align: left;
 }
-.btn:active, button:active, .btn[aria-pressed="true"], button[aria-pressed="true"] { /* DEC-007 | - | [설계결정] reversed */
+.btn:active, button:active, .btn[aria-pressed="true"], button[aria-pressed="true"] { /* DEC-007 | - | [설계결정] reversed; frame fg on fg, size unchanged (DEC-044) */
   color: var(--bg);
   background: var(--fg);
-  padding-left: var(--doc-space-1);
 }
-.btn:disabled, button:disabled { color: var(--c-disabled); border-top-color: var(--c-disabled); cursor: default; } /* DEC-012 */
+.btn:disabled, button:disabled { color: var(--c-disabled); border-color: var(--c-disabled); cursor: default; } /* DEC-012, DEC-044 */
 
 label { display: block; font-size: var(--doc-fs-s); line-height: var(--lh-g1); margin-bottom: var(--doc-space-1); } /* DEC-009 | - | [설계결정] info tier */
 input, select, textarea {                               /* DEC-009 | - | [설계결정] plate + band, exact rectangle */
