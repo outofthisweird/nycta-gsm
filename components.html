@@ -134,6 +134,85 @@
   </section>
 
   <section class="demo">
+    <p class="cap">Vertical line strip (DEC-045) · black plate (expanded, folded with current) &amp; white plate (DEC-042)</p>
+    <div style="display:flex; flex-wrap:wrap; gap:24px; align-items:flex-start">
+
+      <!-- Black plate (default), expanded, yellow strip, wrapped name + transfer discs, current station -->
+      <div class="line-strip" style="--line: var(--c-yellow)">
+        <button type="button" class="line-strip__head" aria-expanded="true">
+          <span class="disc line-strip__disc" data-line="R" style="color: var(--c-black)"><span>R</span></span>
+          <span class="line-strip__title">Broadway Local</span>
+        </button>
+        <ol class="line-strip__stops">
+          <li class="line-strip__stop">
+            <span class="line-strip__name">Forest Hills–71 <span class="line-strip__tail">Av <span class="disc disc--inline" data-line="E"><span>E</span></span></span> <span class="disc disc--inline" data-line="F"><span>F</span></span> <span class="disc disc--inline" data-line="M"><span>M</span></span></span>
+          </li>
+          <li class="line-strip__stop">
+            <span class="line-strip__name">Jackson Heights–Roosevelt Av / 74 St–Broadway <span class="line-strip__tail">Transfer <span class="disc disc--inline" data-line="7"><span>7</span></span></span> <span class="disc disc--inline" data-line="B"><span>B</span></span> <span class="disc disc--inline" data-line="E"><span>E</span></span> <span class="disc disc--inline" data-line="F"><span>F</span></span></span>
+          </li>
+          <li class="line-strip__stop is-current" aria-current="location">
+            <span class="line-strip__name">Times Sq–42 <span class="line-strip__tail">St <span class="disc disc--inline" data-line="1"><span>1</span></span></span> <span class="disc disc--inline" data-line="2"><span>2</span></span> <span class="disc disc--inline" data-line="3"><span>3</span></span> <span class="disc disc--inline" data-line="7"><span>7</span></span> <span class="disc disc--inline" data-line="B"><span>B</span></span> <span class="disc disc--inline" data-line="N"><span>N</span></span></span>
+          </li>
+          <li class="line-strip__stop">
+            <span class="line-strip__name">34 St–Herald <span class="line-strip__tail">Sq <span class="disc disc--inline" data-line="B"><span>B</span></span></span> <span class="disc disc--inline" data-line="D"><span>D</span></span> <span class="disc disc--inline" data-line="F"><span>F</span></span> <span class="disc disc--inline" data-line="N"><span>N</span></span></span>
+          </li>
+          <li class="line-strip__stop">
+            <span class="line-strip__name">Bay Ridge–95 St</span>
+          </li>
+        </ol>
+      </div>
+
+      <!-- Black plate, folded with current station in the middle (Korean) -->
+      <div class="line-strip" lang="ko" style="--line: var(--c-yellow)">
+        <button type="button" class="line-strip__head" aria-expanded="false">
+          <span class="disc line-strip__disc" data-line="N"><span>N</span></span>
+          <span class="line-strip__title">브로드웨이 완행</span>
+        </button>
+        <ol class="line-strip__stops">
+          <li class="line-strip__stop">
+            <span class="line-strip__name">포레스트 힐스</span>
+          </li>
+          <li class="line-strip__fold">
+            <span class="line-strip__count">역 10개</span>
+          </li>
+          <li class="line-strip__stop is-current" aria-current="location">
+            <span class="line-strip__name">타임스 스퀘어–42번가 <span class="line-strip__tail">환승역 <span class="disc disc--inline" data-line="1"><span>1</span></span></span> <span class="disc disc--inline" data-line="A"><span>A</span></span> <span class="disc disc--inline" data-line="B"><span>B</span></span></span>
+          </li>
+          <li class="line-strip__fold">
+            <span class="line-strip__count">역 13개</span>
+          </li>
+          <li class="line-strip__stop">
+            <span class="line-strip__name">베이 리지–95번가</span>
+          </li>
+        </ol>
+      </div>
+
+      <!-- White plate (DEC-042), folded + current station with black transfer disc -->
+      <div class="line-strip line-strip--light" data-line="A">
+        <button type="button" class="line-strip__head" aria-expanded="false">
+          <span class="disc line-strip__disc" data-line="A"><span>A</span></span>
+          <span class="line-strip__title">Eighth Av Express</span>
+        </button>
+        <ol class="line-strip__stops">
+          <li class="line-strip__stop">
+            <span class="line-strip__name">Inwood–207 St</span>
+          </li>
+          <li class="line-strip__fold">
+            <span class="line-strip__count">24 stops</span>
+          </li>
+          <li class="line-strip__stop is-current" aria-current="location">
+            <span class="line-strip__name">59 St–Columbus <span class="line-strip__tail">Circle <span class="disc disc--inline" data-line="1"><span>1</span></span></span> <span class="disc disc--inline" data-line="B"><span>B</span></span> <span class="disc disc--inline" data-line="D"><span>D</span></span></span>
+          </li>
+          <li class="line-strip__stop">
+            <span class="line-strip__name">Far Rockaway–Mott Av</span>
+          </li>
+        </ol>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="demo">
     <p class="cap">Information popup (DEC-031) · in place, and as a modal dialog</p>
     <div style="display:flex; flex-wrap:wrap; gap:24px; align-items:flex-start">
 <div class="popup" role="dialog" aria-labelledby="pop-a-t">

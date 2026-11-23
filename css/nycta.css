@@ -353,14 +353,15 @@ p { margin: 0 0 var(--doc-space-3); }
 .disc--inline > span { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); } /* DEC-034 | - | [변환] out of flow → baseline = margin edge */
 
 /* line → color (COLOR-003 | pdf p.15–40 | [확정]; hex DEC-003) */
-.disc[data-line="1"],  .disc[data-line="7"],  .disc[data-line="D"],  .disc[data-line="EE"] { --line: var(--c-orange); }
-.disc[data-line="2"],  .disc[data-line="HH"], .disc[data-line="QB"] { --line: var(--c-red); }
-.disc[data-line="3"],  .disc[data-line="8"],  .disc[data-line="E"],  .disc[data-line="M"]  { --line: var(--c-lightblue); }
-.disc[data-line="4"],  .disc[data-line="AA"], .disc[data-line="F"]  { --line: var(--c-magenta); }
-.disc[data-line="5"],  .disc[data-line="B"],  .disc[data-line="LL"], .disc[data-line="QJ"] { --line: var(--c-black); }
-.disc[data-line="6"],  .disc[data-line="N"]   { --line: var(--c-yellow); color: var(--c-black); } /* DEC-004 | - | [설계결정] yellow → black glyph */
-.disc[data-line="CC"], .disc[data-line="GG"], .disc[data-line="RR"], .disc[data-line="SS"] { --line: var(--c-green); }
-.disc[data-line="A"],  .disc[data-line="KK"]  { --line: var(--c-blue); }
+:is(.disc, .line-strip)[data-line="1"],  :is(.disc, .line-strip)[data-line="7"],  :is(.disc, .line-strip)[data-line="D"],  :is(.disc, .line-strip)[data-line="EE"] { --line: var(--c-orange); }
+:is(.disc, .line-strip)[data-line="2"],  :is(.disc, .line-strip)[data-line="HH"], :is(.disc, .line-strip)[data-line="QB"] { --line: var(--c-red); }
+:is(.disc, .line-strip)[data-line="3"],  :is(.disc, .line-strip)[data-line="8"],  :is(.disc, .line-strip)[data-line="E"],  :is(.disc, .line-strip)[data-line="M"]  { --line: var(--c-lightblue); }
+:is(.disc, .line-strip)[data-line="4"],  :is(.disc, .line-strip)[data-line="AA"], :is(.disc, .line-strip)[data-line="F"]  { --line: var(--c-magenta); }
+:is(.disc, .line-strip)[data-line="5"],  :is(.disc, .line-strip)[data-line="B"],  :is(.disc, .line-strip)[data-line="LL"], :is(.disc, .line-strip)[data-line="QJ"] { --line: var(--c-black); }
+:is(.disc, .line-strip)[data-line="6"],  :is(.disc, .line-strip)[data-line="N"]   { --line: var(--c-yellow); }
+.disc[data-line="6"], .disc[data-line="N"] { color: var(--c-black); } /* DEC-004 | - | [설계결정] yellow → black glyph */
+:is(.disc, .line-strip)[data-line="CC"], :is(.disc, .line-strip)[data-line="GG"], :is(.disc, .line-strip)[data-line="RR"], :is(.disc, .line-strip)[data-line="SS"] { --line: var(--c-green); }
+:is(.disc, .line-strip)[data-line="A"],  :is(.disc, .line-strip)[data-line="KK"]  { --line: var(--c-blue); }
 
 /* Per-label glyph outlines — DISC-004, DISC-007, DEC-035 | pdf p.15–40 | [변환] D = 1000, glyph cap 408, ink centre at the
    master offset (data/disc_masters.json: dx_D, dy_D, two-letter ink gap); labels without a master (0, 9, C, G, R, X …) centred. */
@@ -651,7 +652,212 @@ td { padding: var(--doc-space-1); border-bottom: var(--doc-rule) solid var(--fg)
 .map a:focus-visible { outline: 1px solid var(--fg); }  /* DEC-008 | - | [설계결정] */
 
 /* -------------------------------------------------------------------------
-   14. Print simulation layer (DEC-038) — opt-in: <html data-print>
+   14. Component — vertical line strip (DEC-045)
+   Markup: <div class="line-strip [line-strip--light]" style="--line: var(--c-yellow)">
+             <button type="button" class="line-strip__head" aria-expanded="true">
+               <span class="disc line-strip__disc" data-line="R"><span>R</span></span>
+               <span class="line-strip__title">Series name</span>
+             </button>
+             <ol class="line-strip__stops">
+               <li class="line-strip__stop"><span class="line-strip__name">Station <span class="line-strip__tail">Name <span class="disc disc--inline" data-line="A"><span>A</span></span></span></span></li>
+               <li class="line-strip__fold"><span class="line-strip__count">역 24개</span></li>
+               <li class="line-strip__stop is-current" aria-current="location"><span class="line-strip__name">Current station</span></li>
+             </ol>
+           </div>
+   ------------------------------------------------------------------------- */
+.line-strip {                                           /* DEC-045, SIGN-017, GRID-021 | pdf p.82 | [설계결정] */
+  --ls-in: max(calc(12px * var(--cap-em) / 1.375), calc(var(--module) / 12)); /* DEC-045, DEC-016 | - | [변환] scales with --module, 12px floor */
+  --ls-cap: calc(var(--ls-in) * 1.375);                 /* TYPE-007 | pdf p.11 | [변환] Information tier cap */
+  --ls-fs: calc(var(--ls-cap) / var(--cap-em));         /* TYPE-007, TYPE-008 | - | [변환] 1rem at standard module */
+  --ls-lh: var(--lh-g1);                                /* GRID-007 | pdf p.11 | [변환] Grid 1 pitch */
+  --ls-dot: calc(var(--ls-in) * 1.6875);                /* DEC-045, DEC-034, DEC-036, GRID-008 | pdf p.11 | [변환] cap × 1 11/16 ÷ 1 3/8 */
+  --ls-strip: calc(var(--ls-dot) * 1.4);                /* DEC-045, GRID-021 | pdf p.82 | [변환] 1:5:1 → 2.3625in (20% colour margin each side) */
+  --ls-gap: calc(var(--ls-in) * 0.5);                   /* DEC-045, GRID-009, DEC-036 | pdf p.11 | [변환] strip/disc → name ½in */
+  --ls-pad: calc(var(--ls-in) * 0.5);                   /* GRID-003, GRID-004 | pdf p.9–11 | [변환] ½in plate margin */
+  --ls-rule: max(1px, calc(var(--ls-in) * 0.125));      /* SIGN-023 | pdf p.88 | [변환] ⅛in rule */
+  --ls-cut: calc(var(--ls-strip) * 0.11);               /* DEC-045 | - | [설계결정] fold horizontal cut thickness */
+  --ls-slice: calc(var(--ls-strip) * 0.21);             /* DEC-045 | - | [설계결정] fold colour slice height */
+  --ls-row-pad: calc((var(--ls-strip) - var(--ls-fs) * var(--ls-lh)) / 2); /* DEC-045 | - | [변환] centres line-1 cap on the dot (½ strip from row top) */
+  --ls-bg: var(--c-black);                              /* DEC-045 | - | [설계결정] black plate (photo default) */
+  --ls-fg: var(--c-white);                              /* DEC-045 | - | [설계결정] */
+  --font-weight: var(--font-weight-dark);               /* DEC-045, DEC-019 | - | [설계결정] white type on black */
+  color: var(--ls-fg);
+  font-size: var(--ls-fs);
+  font-weight: var(--font-weight);
+  line-height: var(--ls-lh);
+  background:
+    linear-gradient(var(--c-white), var(--c-white)) 0 calc(var(--ls-in) * 1.5) / 100% var(--ls-rule) no-repeat, /* DEC-045, DEC-040 | - | [설계결정] 1½in + ⅛in white rule */
+    var(--ls-bg);
+  padding: calc(var(--ls-in) * 2.125) var(--ls-pad) var(--ls-pad); /* DEC-040, GRID-003 | - | [설계결정] 1½ + ⅛ + ½in top; ½in sides & bottom */
+  width: min(100%, calc(var(--ls-in) * 48));            /* DEC-045 | - | [설계결정] standard 4 ft width, fits narrower viewports */
+  box-shadow: 0 0 0 0.5px var(--c-black);               /* DEC-041 | - | [설계결정] 0.5px black ring in light mode */
+}
+.line-strip--light {                                    /* DEC-045, DEC-042 | - | [설계결정] white plate: 1⅝in black top band, white field, black type */
+  --ls-bg: var(--c-white);
+  --ls-fg: var(--c-black);
+  --font-weight: var(--font-weight-light);
+  background:
+    linear-gradient(var(--c-black), var(--c-black)) 0 0 / 100% calc(var(--ls-in) * 1.625) no-repeat, /* DEC-042, GRID-013 | pdf p.64 | [변환] 1⅝in black band */
+    var(--ls-bg);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .line-strip { box-shadow: 0 0 0 0.5px var(--c-white); } /* DEC-041 | - | [설계결정] */
+}
+:root[data-theme="dark"] .line-strip { box-shadow: 0 0 0 0.5px var(--c-white); } /* DEC-041 | - | [설계결정] */
+
+.line-strip__head {                                     /* DEC-045 | - | [설계결정] route disc (D = strip) + series name, usable as toggle button */
+  appearance: none;
+  background: transparent;
+  color: inherit;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: var(--ls-strip) minmax(0, 1fr);
+  column-gap: var(--ls-gap);
+  align-items: center;
+  font: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  word-spacing: inherit;
+  text-align: left;
+}
+button.line-strip__head { cursor: pointer; }
+button.line-strip__head:active { background: transparent; color: inherit; }
+.line-strip__disc { --d: var(--ls-strip); }             /* DEC-045 | - | [설계결정] head disc D = strip width, aligned to strip axis */
+.line-strip__title { min-width: 0; font-size: var(--ls-fs); line-height: var(--ls-lh); }
+
+.line-strip__stops { list-style: none; margin: calc(var(--ls-in) * 0.5) 0 0; padding: 0; } /* DEC-045 | - | [설계결정] */
+.line-strip__stop {                                     /* DEC-045 | - | [설계결정] strip column + station name */
+  display: grid;
+  grid-template-columns: var(--ls-strip) minmax(0, 1fr);
+  column-gap: var(--ls-gap);
+  align-items: start;
+  position: relative;
+  font-size: var(--ls-fs);
+}
+.line-strip__stop::before {                             /* DEC-045 | - | [설계결정] continuous vertical strip */
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--ls-strip);
+  background: var(--line, var(--c-black));
+}
+.line-strip__stop:not(:last-child)::before { bottom: -1px; } /* DEC-045 | - | [설계결정] overlap 1px so fractional scales leave no seam */
+.line-strip__stop:last-child::before { bottom: auto; height: var(--ls-strip); } /* DEC-045 | - | [설계결정] butt end ½ strip past last dot centre */
+.line-strip__stop::after {                              /* DEC-045, DEC-036 | - | [설계결정] black station dot, centred on line 1; pseudo-element keeps DOM border-radius 0 (DEC-009) */
+  content: "";
+  position: absolute;
+  left: calc((var(--ls-strip) - var(--ls-dot)) / 2);
+  top: calc((var(--ls-strip) - var(--ls-dot)) / 2);
+  width: var(--ls-dot);
+  height: var(--ls-dot);
+  border-radius: 50%;
+  background: var(--c-black);
+  z-index: 1;
+}
+.line-strip__name {                                     /* DEC-045 | - | [설계결정] horizontal name + inline transfer discs, wraps like a paragraph */
+  grid-column: 2;
+  min-width: 0;
+  display: block;
+  font: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  word-spacing: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  text-decoration: none;
+  text-align: left;
+  padding: var(--ls-row-pad) 0;
+}
+button.line-strip__name { appearance: none; width: 100%; cursor: pointer; }
+button.line-strip__name:active { background: transparent; color: inherit; }
+.line-strip__tail { white-space: nowrap; }              /* DEC-045 | - | [설계결정] binds last word to transfer disc so no disc is orphaned at line start */
+
+/* Current station ("you are here") — DEC-045, DEC-007 | - | [설계결정] */
+.line-strip__stop:is(.is-current, [aria-current]:not([aria-current="false"]))::after {
+  background: var(--c-white);                           /* DEC-045 | - | [설계결정] white centre + black ring */
+  border: calc(var(--ls-dot) * 0.22) solid var(--c-black);
+}
+.line-strip__stop:is(.is-current, [aria-current]:not([aria-current="false"])) > .line-strip__name {
+  background: var(--ls-fg);                             /* DEC-045, DEC-007 | - | [설계결정] reversed to the plate right edge */
+  color: var(--ls-bg);
+  font-weight: var(--font-weight-light);                /* DEC-019 | - | [설계결정] black on white on black plate */
+  margin-inline: calc(-1 * var(--ls-gap)) calc(-1 * var(--ls-pad));
+  padding-inline: var(--ls-gap) var(--ls-pad);
+}
+.line-strip--light .line-strip__stop:is(.is-current, [aria-current]:not([aria-current="false"])) > .line-strip__name {
+  font-weight: var(--font-weight-dark);                 /* DEC-019 | - | [설계결정] white on black on white plate */
+}
+
+/* Fold indicator — DEC-045 | - | [설계결정] continuous strip sliced centrally by 4 bg cuts leaving 3 colour slices */
+.line-strip__fold {
+  display: grid;
+  grid-template-columns: var(--ls-strip) minmax(0, 1fr);
+  column-gap: var(--ls-gap);
+  align-items: center;
+  min-height: calc(var(--ls-strip) * 2.55);             /* DEC-045 | - | [설계결정] 2.55 × strip */
+  position: relative;
+  font-size: var(--ls-fs);
+}
+.line-strip__fold::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--ls-strip);
+  background: linear-gradient(
+    to bottom,
+    var(--line, var(--c-black)) 0,
+    var(--line, var(--c-black)) calc(50% - var(--ls-slice) * 1.5 - var(--ls-cut) * 2),
+    var(--ls-bg)                calc(50% - var(--ls-slice) * 1.5 - var(--ls-cut) * 2),
+    var(--ls-bg)                calc(50% - var(--ls-slice) * 1.5 - var(--ls-cut)),
+    var(--line, var(--c-black)) calc(50% - var(--ls-slice) * 1.5 - var(--ls-cut)),
+    var(--line, var(--c-black)) calc(50% - var(--ls-slice) * 0.5 - var(--ls-cut)),
+    var(--ls-bg)                calc(50% - var(--ls-slice) * 0.5 - var(--ls-cut)),
+    var(--ls-bg)                calc(50% - var(--ls-slice) * 0.5),
+    var(--line, var(--c-black)) calc(50% - var(--ls-slice) * 0.5),
+    var(--line, var(--c-black)) calc(50% + var(--ls-slice) * 0.5),
+    var(--ls-bg)                calc(50% + var(--ls-slice) * 0.5),
+    var(--ls-bg)                calc(50% + var(--ls-slice) * 0.5 + var(--ls-cut)),
+    var(--line, var(--c-black)) calc(50% + var(--ls-slice) * 0.5 + var(--ls-cut)),
+    var(--line, var(--c-black)) calc(50% + var(--ls-slice) * 1.5 + var(--ls-cut)),
+    var(--ls-bg)                calc(50% + var(--ls-slice) * 1.5 + var(--ls-cut)),
+    var(--ls-bg)                calc(50% + var(--ls-slice) * 1.5 + var(--ls-cut) * 2),
+    var(--line, var(--c-black)) calc(50% + var(--ls-slice) * 1.5 + var(--ls-cut) * 2),
+    var(--line, var(--c-black)) 100%
+  );
+}
+.line-strip__fold:not(:last-child)::before { bottom: -1px; }
+.line-strip__count {                                    /* DEC-045, TYPE-008 | - | [설계결정] 1rem Information tier, --c-grey */
+  grid-column: 2;
+  min-width: 0;
+  font-size: var(--ls-fs);
+  line-height: var(--ls-lh);
+  color: var(--c-grey);
+}
+
+/* Black discs on dark vs light surfaces inside .line-strip — DEC-045, DEC-019, DEC-041 | - | [설계결정] */
+.line-strip:not(.line-strip--light) .disc:is([data-line="5"],[data-line="B"],[data-line="LL"],[data-line="QJ"]) {
+  box-shadow: 0 0 0 0.5px var(--c-white);               /* black disc on black plate needs a white ring */
+}
+.line-strip:not(.line-strip--light) .line-strip__stop:is(.is-current, [aria-current]:not([aria-current="false"])) .disc:is([data-line="5"],[data-line="B"],[data-line="LL"],[data-line="QJ"]) {
+  box-shadow: none;                                     /* white reversed row needs no white ring */
+}
+.line-strip--light .disc:is([data-line="5"],[data-line="B"],[data-line="LL"],[data-line="QJ"]) {
+  box-shadow: none;                                     /* white plate needs no white ring, even in dark mode */
+}
+.line-strip--light .line-strip__stop:is(.is-current, [aria-current]:not([aria-current="false"])) .disc:is([data-line="5"],[data-line="B"],[data-line="LL"],[data-line="QJ"]) {
+  box-shadow: 0 0 0 0.5px var(--c-white);               /* black reversed row needs a white ring */
+}
+
+/* -------------------------------------------------------------------------
+   15. Print simulation layer (DEC-038) — opt-in: <html data-print>
    Off by default; a button with data-print-toggle switches it per viewer (js/nycta.js). Two parts: paper grain + ink edge.
    Dark mode keeps both, mirrored (white fibre, screen blend), without the paper colour; high contrast, forced colours and real printing turn it off.
    Ink-edge filter (#nycta-ink) is injected by js/nycta.js; without the script only paper + grain apply.
@@ -691,8 +897,8 @@ td { padding: var(--doc-space-1); border-bottom: var(--doc-rule) solid var(--fg)
   mix-blend-mode: var(--print-grain-blend);
   opacity: var(--print-grain-now);
 }
-:root[data-print] :is(.plate, .popup, .map__svg),
-:root[data-print] .disc:not(.plate .disc, .popup .disc) {
+:root[data-print] :is(.plate, .popup, .line-strip, .map__svg),
+:root[data-print] .disc:not(.plate .disc, .popup .disc, .line-strip .disc) {
   filter: var(--print-filter);                          /* DEC-038, DEC-009 | - | [설계결정] ragged ink edge, sub-pixel so corners stay square */
 }
 @media (prefers-contrast: more), (forced-colors: active), print {
