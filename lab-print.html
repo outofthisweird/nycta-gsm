@@ -21,7 +21,7 @@
   .controls output { min-width: 2.5em; font-variant-numeric: tabular-nums; }
   section { margin: 0 0 40px; }
   .tag { font: 12px/1.2 system-ui, sans-serif; letter-spacing: 0; word-spacing: normal; color: #666; margin: 0 0 8px; }
-  .row { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+  .demo-row { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
   .doc { max-width: 34em; }
 </style>
 </head>
@@ -61,7 +61,7 @@
 <main lang="en">
   <section>
     <p class="tag">Sign plates</p>
-    <div class="row">
+    <div class="demo-row">
       <div class="plate sign-direction">
         <div class="m m-center"><svg class="arrow" data-dir="up-left"><use href="#arrow"/></svg></div>
         <div class="m m-4"><p class="t-direction trim">Downtown<br>&amp; Brooklyn</p></div>
@@ -91,11 +91,11 @@
 
   <section>
     <p class="tag">Discs on paper (outside plates)</p>
-    <div class="row" style="align-items:flex-end">
+    <div class="demo-row" style="align-items:flex-end">
       <span class="disc" data-line="B"><span>B</span></span>
       <span class="disc" data-line="N"><span>N</span></span>
       <span class="disc" data-line="7"><span>7</span></span>
-      <span class="disc" data-line="L"><span>L</span></span>
+      <span class="disc" data-line="L" data-color="black"><span>L</span></span>
       <span class="disc disc--m" data-line="6"><span>6</span></span>
       <span class="disc disc--s" data-line="KK"><span>KK</span></span>
     </div>
@@ -110,7 +110,7 @@
           <p id="pp-t">To Harlem–148 St</p>
           <p>Late nights take <span class="disc disc--inline" data-line="2"><span>2</span></span> to</p>
           <p>Times Sq–42 St for <span class="disc disc--inline" data-line="3"><span>3</span></span></p>
-          <form method="dialog"><button class="popup__close">Close</button></form>
+          <p><button type="button" class="popup__close">Close</button></p>
         </div>
       </div>
     </div>

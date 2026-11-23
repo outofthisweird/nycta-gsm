@@ -407,8 +407,13 @@
       rows.forEach(function (row, r) {
         var ts = el('tspan', { x: f(A[0]), y: f(y0 + r * lh) }, t);
         ts.textContent = row;
-        // first-letter side bearing (DEC-025 / DEC-033) for flush-left names
-        if (anchor === 'start') ts.setAttribute('x', f(A[0] - (parseFloat(getComputedStyle(ts).getPropertyValue('--lsb-pull')) || 0) * fs));
+        // first-letter side bearing (DEC-043 / DEC-025 / DEC-033) for flush-left names
+        if (anchor === 'start') {
+          var first = row.replace(/^\s+/, '').charAt(0);
+          var perChar = window.NYCTA && window.NYCTA.pullForChar ? window.NYCTA.pullForChar(first) : null;
+          var pullVal = perChar !== null ? perChar : (parseFloat(getComputedStyle(ts).getPropertyValue('--lsb-pull')) || 0);
+          ts.setAttribute('x', f(A[0] - pullVal * fs));
+        }
       });
       var bb = t.getBBox();
       return { node: node === gNames ? t : node, rect: [bb.x, y0 - cap, bb.x + bb.width, y0 + (k - 1) * lh] };

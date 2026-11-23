@@ -11,9 +11,12 @@
   /* page scaffolding only (not part of the system) */
   main { padding: var(--doc-space-4) var(--doc-space-3); max-width: 1400px; }
   .demo { margin: 0 0 var(--doc-space-4); }
-  .demo > .cap { font-size: 12px; color: var(--c-grey); margin: 0 0 6px; letter-spacing: 0; }
+  .cap { font-size: 12px; color: var(--c-grey); margin: 0 0 6px; letter-spacing: 0; word-spacing: normal; line-height: 1.4; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; margin: 0 0 var(--doc-space-3); padding-bottom: 10px; border-bottom: var(--doc-rule) solid var(--fg); }
+  .toolbar .cap { margin: 0; }
   .wall { background: #d9d6d2; padding: 24px; display: grid; grid-template-columns: minmax(0,1fr); gap: 24px; justify-items: start; }
-  @media (prefers-color-scheme: dark) { .wall { background: #2a2a2a; } }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .wall { background: #2a2a2a; } }
+  :root[data-theme="dark"] .wall { background: #2a2a2a; }
 </style>
 </head>
 <body>
@@ -25,6 +28,9 @@
 </svg>
 
 <main>
+  <div class="toolbar" lang="ko">
+    <p class="cap">보기 · <button type="button" class="print-toggle" data-print-toggle aria-pressed="false">인쇄 질감</button></p>
+  </div>
   <section class="demo">
     <p class="cap">Sign components (sign scale, --module)</p>
     <div class="wall">
@@ -138,9 +144,9 @@
     <div style="display:flex; flex-wrap:wrap; gap:24px; align-items:flex-start">
 
       <!-- Black plate (default), expanded, yellow strip, wrapped name + transfer discs, current station -->
-      <div class="line-strip" style="--line: var(--c-yellow)">
+      <div class="line-strip" data-color="yellow">
         <button type="button" class="line-strip__head" aria-expanded="true">
-          <span class="disc line-strip__disc" data-line="R" style="color: var(--c-black)"><span>R</span></span>
+          <span class="disc line-strip__disc" data-line="R" data-color="yellow"><span>R</span></span>
           <span class="line-strip__title">Broadway Local</span>
         </button>
         <ol class="line-strip__stops">
@@ -148,10 +154,10 @@
             <span class="line-strip__name">Forest Hills–71 <span class="line-strip__tail">Av <span class="disc disc--inline" data-line="E"><span>E</span></span></span> <span class="disc disc--inline" data-line="F"><span>F</span></span> <span class="disc disc--inline" data-line="M"><span>M</span></span></span>
           </li>
           <li class="line-strip__stop">
-            <span class="line-strip__name">Jackson Heights–Roosevelt Av / 74 St–Broadway <span class="line-strip__tail">Transfer <span class="disc disc--inline" data-line="7"><span>7</span></span></span> <span class="disc disc--inline" data-line="B"><span>B</span></span> <span class="disc disc--inline" data-line="E"><span>E</span></span> <span class="disc disc--inline" data-line="F"><span>F</span></span></span>
+            <span class="line-strip__name">Jackson Heights–Roosevelt Av / 74 St–Broadway <span class="line-strip__tail">Transfer <span class="disc disc--inline" data-line="B"><span>B</span></span></span> <span class="disc disc--inline" data-line="E"><span>E</span></span> <span class="disc disc--inline" data-line="F"><span>F</span></span> <span class="disc disc--inline" data-line="7"><span>7</span></span></span>
           </li>
           <li class="line-strip__stop is-current" aria-current="location">
-            <span class="line-strip__name">Times Sq–42 <span class="line-strip__tail">St <span class="disc disc--inline" data-line="1"><span>1</span></span></span> <span class="disc disc--inline" data-line="2"><span>2</span></span> <span class="disc disc--inline" data-line="3"><span>3</span></span> <span class="disc disc--inline" data-line="7"><span>7</span></span> <span class="disc disc--inline" data-line="B"><span>B</span></span> <span class="disc disc--inline" data-line="N"><span>N</span></span></span>
+            <span class="line-strip__name">Times Sq–42 <span class="line-strip__tail">St <span class="disc disc--inline" data-line="B"><span>B</span></span></span> <span class="disc disc--inline" data-line="N"><span>N</span></span> <span class="disc disc--inline" data-line="1"><span>1</span></span> <span class="disc disc--inline" data-line="2"><span>2</span></span> <span class="disc disc--inline" data-line="3"><span>3</span></span> <span class="disc disc--inline" data-line="7"><span>7</span></span></span>
           </li>
           <li class="line-strip__stop">
             <span class="line-strip__name">34 St–Herald <span class="line-strip__tail">Sq <span class="disc disc--inline" data-line="B"><span>B</span></span></span> <span class="disc disc--inline" data-line="D"><span>D</span></span> <span class="disc disc--inline" data-line="F"><span>F</span></span> <span class="disc disc--inline" data-line="N"><span>N</span></span></span>
@@ -163,7 +169,7 @@
       </div>
 
       <!-- Black plate, folded with current station in the middle (Korean) -->
-      <div class="line-strip" lang="ko" style="--line: var(--c-yellow)">
+      <div class="line-strip" lang="ko" data-line="N">
         <button type="button" class="line-strip__head" aria-expanded="false">
           <span class="disc line-strip__disc" data-line="N"><span>N</span></span>
           <span class="line-strip__title">브로드웨이 완행</span>
@@ -176,7 +182,7 @@
             <span class="line-strip__count">역 10개</span>
           </li>
           <li class="line-strip__stop is-current" aria-current="location">
-            <span class="line-strip__name">타임스 스퀘어–42번가 <span class="line-strip__tail">환승역 <span class="disc disc--inline" data-line="1"><span>1</span></span></span> <span class="disc disc--inline" data-line="A"><span>A</span></span> <span class="disc disc--inline" data-line="B"><span>B</span></span></span>
+            <span class="line-strip__name">타임스 스퀘어–42번가 <span class="line-strip__tail">환승역 <span class="disc disc--inline" data-line="A"><span>A</span></span></span> <span class="disc disc--inline" data-line="B"><span>B</span></span> <span class="disc disc--inline" data-line="1"><span>1</span></span></span>
           </li>
           <li class="line-strip__fold">
             <span class="line-strip__count">역 13개</span>
@@ -201,7 +207,7 @@
             <span class="line-strip__count">24 stops</span>
           </li>
           <li class="line-strip__stop is-current" aria-current="location">
-            <span class="line-strip__name">59 St–Columbus <span class="line-strip__tail">Circle <span class="disc disc--inline" data-line="1"><span>1</span></span></span> <span class="disc disc--inline" data-line="B"><span>B</span></span> <span class="disc disc--inline" data-line="D"><span>D</span></span></span>
+            <span class="line-strip__name">59 St–Columbus <span class="line-strip__tail">Circle <span class="disc disc--inline" data-line="B"><span>B</span></span></span> <span class="disc disc--inline" data-line="D"><span>D</span></span> <span class="disc disc--inline" data-line="1"><span>1</span></span></span>
           </li>
           <li class="line-strip__stop">
             <span class="line-strip__name">Far Rockaway–Mott Av</span>
@@ -213,7 +219,7 @@
   </section>
 
   <section class="demo">
-    <p class="cap">Information popup (DEC-031) · in place, and as a modal dialog</p>
+    <p class="cap">Information popup (DEC-031, DEC-042) · in place, and as a modal dialog</p>
     <div style="display:flex; flex-wrap:wrap; gap:24px; align-items:flex-start">
 <div class="popup" role="dialog" aria-labelledby="pop-a-t">
   <div class="popup__body">
@@ -222,7 +228,7 @@
       <p id="pop-a-t">To Harlem–148 St</p>
       <p>Late nights take <span class="disc disc--inline" data-line="2"><span>2</span></span> to</p>
       <p>Times Sq–42 St for <span class="disc disc--inline" data-line="3"><span>3</span></span></p>
-      <form method="dialog"><button class="popup__close">Close</button></form>
+      <p><button type="button" class="popup__close">Close</button></p>
     </div>
   </div>
 </div>
@@ -233,20 +239,20 @@
       <p>No <span class="disc disc--inline" data-line="B"><span>B</span></span> trains between</p>
       <p>Dekalb Av and Brighton Beach</p>
       <p>Take the <span class="disc disc--inline" data-line="D"><span>D</span></span> instead</p>
-      <form method="dialog"><button class="popup__close">Close</button></form>
+      <p><button type="button" class="popup__close">Close</button></p>
     </div>
   </div>
 </div>
     </div>
-    <p style="margin-top:var(--doc-space-3)"><a href="#" onclick="document.getElementById('pop-m').showModal(); return false;">Open the popup</a></p>
-<dialog class="popup" id="pop-m" aria-labelledby="pop-m-t" autofocus>
+    <p style="margin-top:var(--doc-space-3)"><button type="button" class="btn-link" onclick="document.getElementById('pop-m').showModal()">Open the popup</button></p>
+<dialog class="popup" id="pop-m" aria-labelledby="pop-m-t">
   <div class="popup__body">
     <span class="disc popup__disc" data-line="3" role="img" aria-label="3 train"><span>3</span></span>
     <div class="popup__text">
       <p id="pop-m-t">To Harlem–148 St</p>
       <p>Late nights take <span class="disc disc--inline" data-line="2"><span>2</span></span> to</p>
       <p>Times Sq–42 St for <span class="disc disc--inline" data-line="3"><span>3</span></span></p>
-      <form method="dialog"><button class="popup__close">Close</button></form>
+      <form method="dialog"><button class="popup__close" autofocus>Close</button></form>
     </div>
   </div>
 </dialog>
@@ -270,7 +276,10 @@
     <form style="max-width:420px">
       <label for="from">From</label><input id="from" value="57 St–7 Av">
       <p class="error" style="margin-top:8px">Station not found</p>
-      <button type="button">Search</button> <button type="button" disabled>Disabled</button>
+      <label for="route-type" style="margin-top:12px">Route</label>
+      <select id="route-type"><option>Any route</option><option>Express only</option></select>
+      <label style="margin-top:12px; display:flex; align-items:center; gap:8px"><input type="checkbox" checked> Express trains only</label>
+      <div style="margin-top:12px"><button type="button">Search</button> <button type="button" disabled>Disabled</button></div>
     </form>
     <h3>Directory</h3>
     <table><thead><tr><th>Destination</th><th>How to get there</th></tr></thead>

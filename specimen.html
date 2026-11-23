@@ -15,7 +15,8 @@
   .sec > .lead { font-size: 15px; letter-spacing: 0; word-spacing: normal; line-height: 1.5; max-width: 60ch; margin: 0 0 var(--doc-space-3); }
   .cap { font-size: 12px; color: var(--c-grey); margin: 0 0 6px; letter-spacing: 0; word-spacing: normal; line-height: 1.4; }
   .wall { background: #d9d6d2; padding: 24px; display: grid; grid-template-columns: minmax(0,1fr); gap: 28px; justify-items: start; }
-  @media (prefers-color-scheme: dark) { .wall { background: #2a2a2a; } }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .wall { background: #2a2a2a; } }
+  :root[data-theme="dark"] .wall { background: #2a2a2a; }
   .wall > figure { margin: 0; }
   .show-grid .m { outline: 1px dashed rgba(0,180,255,.9); outline-offset: -1px; }
   .flexrow { display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start; }
@@ -46,7 +47,7 @@
 
 <main>
   <header class="sec">
-    <p class="cap">NYCTA Graphics Standards Manual 1970 → Web</p>
+    <p class="cap">NYCTA Graphics Standards Manual 1970 → Web · <button type="button" class="print-toggle" data-print-toggle aria-pressed="false">인쇄 질감</button></p>
     <h1 lang="en">Specimen</h1>
     <p class="lead">원장(ledger.yaml)에 있는 규칙을 한 페이지에 모은 견본입니다. 회색 배경은 벽 역할을 하는 페이지 장식이고, 시스템에 속하지 않습니다.</p>
   </header>
@@ -156,7 +157,7 @@
   <section class="sec">
     <p class="no">06 · SIGN-003–022</p>
     <h2>사인 조합</h2>
-    <p class="lead">왼쪽에서 오른쪽으로 화살표 → 원판 → 글 순서로 놓습니다. 방향이 둘이면 빈 칸 하나로 나눕니다.</p>
+    <p class="lead">왼쪽에서 오른쪽으로 화살표 → 글 → 원판 순서로 놓습니다. 방향이 둘이면 빈 칸 하나로 나눕니다.</p>
     <div class="wall">
       <figure><p class="cap">방향 · 두 방향 사이 빈 칸</p>
         <div class="plate sign-direction" role="img" aria-label="Straight ahead: EE, N, QB, RR. Right: 2" lang="en">
@@ -220,19 +221,20 @@
     <p class="lead">매뉴얼에 없는 웹 요소는 사인 비율에서 끌어와 새로 정했습니다(설계결정). 본문 1rem이 안내 글자 크기에 해당합니다.</p>
 
     <p class="cap">경로 표시</p>
+    <div lang="en">
     <nav aria-label="breadcrumb"><ol class="crumbs">
       <li><a href="#">All trains</a></li>
       <li><svg class="arrow" data-dir="right" aria-hidden="true"><use href="#arrow"/></svg></li>
       <li><a href="#">Uptown &amp; The Bronx</a></li>
     </ol></nav>
 
-    <p class="cap" style="margin-top:24px">제목 3단계 · 본문 · 링크 · 글 속 원판</p>
+    <p class="cap" lang="ko" style="margin-top:24px">제목 3단계 · 본문 · 링크 · 글 속 원판</p>
     <h1>Times Square</h1>
     <h2>Downtown &amp; Brooklyn</h2>
     <h3>Lower level</h3>
     <p>Trains stop here at all times. Change for <span class="disc disc--inline" data-line="7"><span>7</span></span> and <span class="disc disc--inline" data-line="N"><span>N</span></span> on the lower level. Read the <a href="#">service notes</a> before travelling. Go <svg class="arrow arrow--inline" data-dir="right" aria-hidden="true"><use href="#arrow"/></svg> to the street.</p>
 
-    <p class="cap" style="margin-top:24px">내비게이션</p>
+    <p class="cap" lang="ko" style="margin-top:24px">내비게이션</p>
     <ul class="nav">
       <li><a href="#"><svg class="arrow" data-dir="left" aria-hidden="true"><use href="#arrow"/></svg>Back</a></li>
       <li><a href="#"><svg class="arrow" data-dir="up" aria-hidden="true"><use href="#arrow"/></svg>All trains</a></li>
@@ -241,12 +243,12 @@
 
     <div class="two" style="margin-top:var(--doc-space-4)">
       <div>
-        <p class="cap">버튼 · 기본 / 눌림 / 비활성 (DEC-007·044, 대안 검토 중)</p>
+        <p class="cap" lang="ko">버튼 · 기본 / 눌림 / 비활성 (DEC-007·044, 대안 검토 중)</p>
         <button type="button">Search</button>
         <button type="button" aria-pressed="true">Pressed</button>
         <button type="button" disabled>Disabled</button>
 
-        <p class="cap" style="margin-top:24px">입력 · 오류 · 비활성</p>
+        <p class="cap" lang="ko" style="margin-top:24px">입력 · 오류 · 비활성</p>
         <form>
           <label for="from">From</label><input id="from" value="57 St–7 Av">
           <label for="to" style="margin-top:16px">To</label><input id="to" value="Avenue Q" aria-invalid="true">
@@ -254,33 +256,35 @@
           <label for="via" style="margin-top:16px">Via</label>
           <select id="via"><option>Any route</option><option>Express only</option></select>
           <label for="off" style="margin-top:16px">Fare</label><input id="off" value="Fixed" disabled>
+          <label style="margin-top:16px; display:flex; align-items:center; gap:8px"><input type="checkbox" checked> Express trains only</label>
         </form>
       </div>
       <div>
-        <p class="cap">작은 메뉴 (모바일)</p>
+        <p class="cap" lang="ko">작은 메뉴 (모바일)</p>
         <div class="compact">
           <div class="compact__title">Times Square</div>
           <div class="compact__item">Downtown &amp; Brooklyn</div>
           <div class="compact__item">Mon–Fri 7 am to 8:10 pm</div>
         </div>
-        <p class="cap" style="margin-top:24px">임시 공지</p>
+        <p class="cap" lang="ko" style="margin-top:24px">임시 공지</p>
         <p class="notice">Temporary: weekend service changes.</p>
       </div>
     </div>
 
-    <p class="cap" style="margin-top:var(--doc-space-4)">표 (Directory)</p>
+    <p class="cap" lang="ko" style="margin-top:var(--doc-space-4)">표 (Directory)</p>
     <table><thead><tr><th>Destination</th><th>How to get there</th></tr></thead>
       <tbody>
         <tr><td>Avenue M</td><td><span class="disc disc--inline" data-line="D"><span>D</span></span></td></tr>
         <tr><td>Union Sq</td><td><span class="disc disc--inline" data-line="4"><span>4</span></span> <span class="disc disc--inline" data-line="5"><span>5</span></span> <span class="disc disc--inline" data-line="6"><span>6</span></span></td></tr>
         <tr><td>Coney Island</td><td><span class="disc disc--inline" data-line="B"><span>B</span></span> <span class="disc disc--inline" data-line="F"><span>F</span></span> <span class="disc disc--inline" data-line="N"><span>N</span></span></td></tr>
       </tbody></table>
+    </div>
   </section>
   <!-- 8. Information popup -->
   <section class="sec doc-demo">
-    <p class="no">08 · DEC-031</p>
+    <p class="no">08 · DEC-031, DEC-041, DEC-042</p>
     <h2>안내 팝업</h2>
-    <p class="lead">나중 시기 MTA 검정 안내판을 바탕으로, 페이지와 반대 색의 판에 안내 크기 글자를 Grid 1 간격으로 놓았습니다. 위에 1½″ 띠와 ⅛″ 선(합쳐서 매뉴얼 띠 1⅝″), 선에서 첫 대문자 선까지 ½″. 앞 원판은 첫 줄 대문자 선부터 둘째 줄 기준선까지 걸칩니다. 다크 모드에서는 흰 판에 검정 글자가 됩니다.</p>
+    <p class="lead">일반 사인 판과 같은 구조(위 1⅝″ 검정 띠 + ½″ 여백 + 흰 바탕 검정 글자)에 안내 크기 글자를 Grid 1 간격으로 놓았습니다. 앞 원판은 첫 줄 대문자 선부터 둘째 줄 기준선까지 걸칩니다. 다크 모드에서도 반전하지 않고 라이트 모드 그대로 유지하며 0.5px 흰 테두리만 두릅니다.</p>
     <div class="flexrow">
 <div class="popup" role="dialog" aria-labelledby="sp-a-t" lang="en">
   <div class="popup__body">
@@ -289,7 +293,7 @@
       <p id="sp-a-t">To Harlem–148 St</p>
       <p>Late nights take <span class="disc disc--inline" data-line="2"><span>2</span></span> to</p>
       <p>Times Sq–42 St for <span class="disc disc--inline" data-line="3"><span>3</span></span></p>
-      <form method="dialog"><button class="popup__close">Close</button></form>
+      <p><button type="button" class="popup__close">Close</button></p>
     </div>
   </div>
 </div>
@@ -300,23 +304,59 @@
       <p>No <span class="disc disc--inline" data-line="B"><span>B</span></span> trains between</p>
       <p>Dekalb Av and Brighton Beach</p>
       <p>Take the <span class="disc disc--inline" data-line="D"><span>D</span></span> instead</p>
-      <form method="dialog"><button class="popup__close">Close</button></form>
+      <p><button type="button" class="popup__close">Close</button></p>
     </div>
   </div>
 </div>
     </div>
-    <p style="margin-top:var(--doc-space-3)"><a href="#" onclick="document.getElementById('sp-m').showModal(); return false;">Open the popup</a></p>
-<dialog class="popup" id="sp-m" aria-labelledby="sp-m-t" autofocus>
+    <p style="margin-top:var(--doc-space-3)" lang="en"><button type="button" class="btn-link" onclick="document.getElementById('sp-m').showModal()">Open the popup</button></p>
+<dialog class="popup" id="sp-m" aria-labelledby="sp-m-t" lang="en">
   <div class="popup__body">
     <span class="disc popup__disc" data-line="3" role="img" aria-label="3 train"><span>3</span></span>
     <div class="popup__text">
       <p id="sp-m-t">To Harlem–148 St</p>
       <p>Late nights take <span class="disc disc--inline" data-line="2"><span>2</span></span> to</p>
       <p>Times Sq–42 St for <span class="disc disc--inline" data-line="3"><span>3</span></span></p>
-      <form method="dialog"><button class="popup__close">Close</button></form>
+      <form method="dialog"><button class="popup__close" autofocus>Close</button></form>
     </div>
   </div>
 </dialog>
+  </section>
+
+  <!-- 9. Korean & Vertical line strip -->
+  <section class="sec">
+    <p class="no">09 · DEC-032, DEC-033, DEC-045</p>
+    <h2>한글 사인 · 세로 노선 띠</h2>
+    <p class="lead">한글은 NYCTA Hangul(SUIT 700, 대문자 높이의 1.1배, 윗선 맞춤)을 씁니다. 세로 노선 띠는 기본 검정 판과 흰 판(`.line-strip--light`) 두 가지이며 다크 모드에서도 색을 반전하지 않습니다. 노선도(`DEC-036`)는 <a href="map.html">Route map</a>에서 볼 수 있습니다.</p>
+    <div class="wall">
+      <div class="plate sign-ident"><div class="m"><p class="t-ident trim">동대문역사문화공원</p></div></div>
+      <div class="flexrow">
+        <div class="line-strip" data-line="N">
+          <button type="button" class="line-strip__head" aria-expanded="false">
+            <span class="disc line-strip__disc" data-line="N"><span>N</span></span>
+            <span class="line-strip__title">브로드웨이 완행</span>
+          </button>
+          <ol class="line-strip__stops">
+            <li class="line-strip__stop"><span class="line-strip__name">포레스트 힐스</span></li>
+            <li class="line-strip__fold"><span class="line-strip__count">역 10개</span></li>
+            <li class="line-strip__stop is-current" aria-current="location"><span class="line-strip__name">타임스 스퀘어–42번가 <span class="line-strip__tail">환승역 <span class="disc disc--inline" data-line="A"><span>A</span></span></span> <span class="disc disc--inline" data-line="B"><span>B</span></span> <span class="disc disc--inline" data-line="1"><span>1</span></span></span></li>
+            <li class="line-strip__stop"><span class="line-strip__name">베이 리지–95번가</span></li>
+          </ol>
+        </div>
+        <div class="line-strip line-strip--light" data-line="A" lang="en">
+          <button type="button" class="line-strip__head" aria-expanded="false">
+            <span class="disc line-strip__disc" data-line="A"><span>A</span></span>
+            <span class="line-strip__title">Eighth Av Express</span>
+          </button>
+          <ol class="line-strip__stops">
+            <li class="line-strip__stop"><span class="line-strip__name">Inwood–207 St</span></li>
+            <li class="line-strip__fold"><span class="line-strip__count">24 stops</span></li>
+            <li class="line-strip__stop is-current" aria-current="location"><span class="line-strip__name">59 St–Columbus <span class="line-strip__tail">Circle <span class="disc disc--inline" data-line="B"><span>B</span></span></span> <span class="disc disc--inline" data-line="D"><span>D</span></span> <span class="disc disc--inline" data-line="1"><span>1</span></span></span></li>
+            <li class="line-strip__stop"><span class="line-strip__name">Far Rockaway–Mott Av</span></li>
+          </ol>
+        </div>
+      </div>
+    </div>
   </section>
 </main>
 </body>

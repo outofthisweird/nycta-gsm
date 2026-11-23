@@ -49,17 +49,34 @@
     return null;
   }
 
+  function pullForChar(c) {
+    readTable();
+    var v = c && table[c];
+    return typeof v === 'number' && !isNaN(v) ? v : null;
+  }
+
   function pull() {
     readTable();
     var els = document.querySelectorAll(PULLED);
     for (var i = 0; i < els.length; i++) {
-      var c = firstChar(els[i]), v = c && table[c];
-      if (typeof v === 'number' && !isNaN(v)) els[i].style.setProperty('--lsb-pull', v + 'em');
+      var v = pullForChar(firstChar(els[i]));
+      if (v !== null) els[i].style.setProperty('--lsb-pull', v + 'em');
       else els[i].style.removeProperty('--lsb-pull');
     }
   }
 
+  function ensureArrow() {
+    if (document.getElementById('arrow') || !document.querySelector('use[href="#arrow"]')) return;
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden';
+    svg.innerHTML = '<symbol id="arrow" viewBox="-0.5 -0.5 1 1">' +
+      '<path d="M -0.488 -0.1015 L 0.119 -0.1015 L -0.048 -0.269 L 0.096 -0.403 L 0.5 0 L 0.096 0.403 L -0.048 0.269 L 0.119 0.1015 L -0.488 0.1015 Z"/></symbol>';
+    document.body.insertBefore(svg, document.body.firstChild);
+  }
+
   function size() {
+    ensureArrow();
     pull();
     var cells = document.querySelectorAll('.sign-ident > .m');
     for (var i = 0; i < cells.length; i++) cells[i].style.removeProperty('--plate-w');
@@ -84,6 +101,7 @@
   window.NYCTA = window.NYCTA || {};
   window.NYCTA.sizePlates = size;
   window.NYCTA.pullFirstLetters = pull;
+  window.NYCTA.pullForChar = pullForChar;
 })();
 
 /* Print simulation layer (DEC-038): only with <html data-print>. Injects the ink-edge filter the CSS

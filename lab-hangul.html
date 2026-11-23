@@ -21,7 +21,8 @@
   .controls input { all: revert; }
   section { margin: 0 0 32px; }
   .wall { background: #d9d6d2; padding: 16px; display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
-  @media (prefers-color-scheme: dark) { .wall { background: #2a2a2a; } }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .wall { background: #2a2a2a; } }
+  :root[data-theme="dark"] .wall { background: #2a2a2a; }
   .box .trim { outline: 1px solid rgba(0,160,255,.9); outline-offset: 0; }
   .box .m { outline: 1px dashed rgba(255,120,0,.8); outline-offset: -1px; }
 
