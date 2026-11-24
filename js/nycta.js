@@ -106,45 +106,119 @@
 
 /* Print simulation layer (DEC-038): only with <html data-print>. Injects the ink-edge filter the CSS
    points at (filter: url(#nycta-ink)); its strength is --print-edge in px. NYCTAPrint.update() re-reads it.
+   Pre-baked tiles (DEC-038, 2026-11-24): both the ink-edge displacement noise and the paper grain are baked
+   once onto small seamless PNG data URIs when data-print turns on (lazy: 0ms when off), replacing live
+   feTurbulence which stalled WebKit/iOS Safari on filtered plates, scrolling blocks and moving trains.
    Zoom (DEC-039): the texture is held at screen-pixel size, so it reads the same at any zoom. z = device px per
-   CSS px / 2 (1 = 100 % on a retina screen, where the values were tuned). Noise frequency follows z (bumps stay
-   ~1.8 device px, never finer than the screen can show, never blown up into waves); the edge displacement follows
-   1/z when zoomed in (stays ±1.5 device px) but stays in CSS px when zoomed out, so small type is not shredded.
-   The grain tile is sized the same way (--print-grain-size). */
+   CSS px / 2 (1 = 100 % on a retina screen, where the values were tuned). The displacement tile size follows
+   1/z (bumps stay ~1.8 device px, never finer than the screen can show, never blown up into waves); the edge
+   displacement follows 1/z when zoomed in (stays ±1.5 device px) but stays in CSS px when zoomed out, so small
+   type is not shredded. The grain tile is sized the same way (--print-grain-size). */
 (function () {
-  var NS = 'http://www.w3.org/2000/svg', disp, turb, EDGE_F = 1.1, GRAIN = 240;
+  var NS = 'http://www.w3.org/2000/svg', disp, img, EDGE_TILE = 128, GRAIN = 240, noiseURI = null, grainReady = false, lastZ = 0, lastEdge = null;
+  function rng(seed) {
+    var s = seed >>> 0;
+    return function () {
+      s |= 0; s = s + 0x6D2B79F5 | 0;
+      var t = Math.imul(s ^ s >>> 15, 1 | s);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  function bakeNoise() {
+    if (noiseURI) return noiseURI;
+    var T = EDGE_TILE, S = T * 2, c = document.createElement('canvas');
+    c.width = c.height = S;
+    var ctx = c.getContext('2d'), im = ctx.createImageData(S, S), d = im.data;
+    var R = rng(20261119), co = new Float32Array(T * T * 2);
+    for (var n = 0; n < co.length; n++) co[n] = R();
+    function at(ch, u, v) {
+      var u0 = u | 0, v0 = v | 0, fu = u - u0, fv = v - v0, u1 = (u0 + 1) % T, v1 = (v0 + 1) % T;
+      u0 %= T; v0 %= T;
+      var a = co[(v0 * T + u0) * 2 + ch], b = co[(v0 * T + u1) * 2 + ch],
+          e = co[(v1 * T + u0) * 2 + ch], f = co[(v1 * T + u1) * 2 + ch];
+      return (a + (b - a) * fu) * (1 - fv) + (e + (f - e) * fu) * fv;
+    }
+    for (var j = 0; j < S; j++) for (var i = 0; i < S; i++) {
+      var k = (j * S + i) * 4;
+      for (var ch = 0; ch < 2; ch++) d[k + ch] = Math.round(255 * (0.5 + ((at(ch, i / 2, j / 2) - 0.5) * 0.55 + (R() - 0.5) * 0.45) * 0.8));
+      d[k + 2] = 128; d[k + 3] = 255;
+    }
+    ctx.putImageData(im, 0, 0);
+    noiseURI = c.toDataURL();
+    return noiseURI;
+  }
+  // Seamless paper-fibre grain tile (DEC-038): replaces the 3-octave SVG feTurbulence background on body::after
+  // with a decoded bitmap PNG (light = warm fibre rgb(82,69,51), dark = white specks), matching the SVG's alpha curve.
+  function bakeGrain() {
+    if (grainReady) return;
+    grainReady = true;
+    var S = 192, c = document.createElement('canvas');
+    c.width = c.height = S;
+    var ctx = c.getContext('2d'), R = rng(20261124);
+    var G1 = 96, g1 = new Float32Array(G1 * G1);
+    for (var n = 0; n < g1.length; n++) g1[n] = R();
+    var alpha = new Uint8Array(S * S);
+    for (var j = 0; j < S; j++) for (var i = 0; i < S; i++) {
+      var u = i * 0.5, v = j * 0.5, u0 = u | 0, v0 = v | 0, fu = u - u0, fv = v - v0, u1 = (u0 + 1) % G1, v1 = (v0 + 1) % G1;
+      var c0 = (g1[v0 * G1 + u0] * (1 - fu) + g1[v0 * G1 + u1] * fu) * (1 - fv) +
+               (g1[v1 * G1 + u0] * (1 - fu) + g1[v1 * G1 + u1] * fu) * fv;
+      var val = c0 * 0.62 + R() * 0.38;
+      var a = val * 1.8 - 0.82;
+      alpha[j * S + i] = a <= 0 ? 0 : a >= 1 ? 255 : Math.round(a * 255);
+    }
+    function tile(r, g, b) {
+      var im = ctx.createImageData(S, S), d = im.data;
+      for (var p = 0; p < alpha.length; p++) {
+        var k = p * 4; d[k] = r; d[k + 1] = g; d[k + 2] = b; d[k + 3] = alpha[p];
+      }
+      ctx.putImageData(im, 0, 0);
+      return 'url("' + c.toDataURL() + '")';
+    }
+    var root = document.documentElement.style;
+    root.setProperty('--print-grain-tex-light', tile(82, 69, 51));
+    root.setProperty('--print-grain-tex-dark', tile(255, 255, 255));
+  }
   function zoom() {
     var vv = window.visualViewport, z = (window.devicePixelRatio || 1) * (vv && vv.scale ? vv.scale : 1) / 2;
     return z > 0 ? z : 1;
   }
-  function update() {
+  function update(force) {
     var root = document.documentElement, z = zoom();
+    if (!force && z === lastZ && disp) return;
+    lastZ = z;
     root.style.setProperty('--print-grain-size', (GRAIN / z).toFixed(2) + 'px');
     if (!disp) return;
     var v = parseFloat(getComputedStyle(root).getPropertyValue('--print-edge'));
     if (!isFinite(v)) v = 1;
-    disp.setAttribute('scale', (v * Math.min(1, 1 / z)).toFixed(3));
-    turb.setAttribute('baseFrequency', (EDGE_F * z).toFixed(3));
+    var sc = (v * Math.min(1, 1 / z)).toFixed(3), ts = (EDGE_TILE / z).toFixed(2);
+    if (sc !== lastEdge || force) { lastEdge = sc; disp.setAttribute('scale', sc); }
+    img.setAttribute('width', ts);
+    img.setAttribute('height', ts);
   }
   function init() {
-    if (!document.documentElement.hasAttribute('data-print') || document.getElementById('nycta-ink')) return update();
+    if (!document.documentElement.hasAttribute('data-print')) return;
+    bakeGrain();
+    if (document.getElementById('nycta-ink')) return update(true);
     var svg = document.createElementNS(NS, 'svg');
     svg.setAttribute('aria-hidden', 'true');
     svg.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden';
     svg.innerHTML = '<filter id="nycta-ink" x="-2%" y="-2%" width="104%" height="104%" color-interpolation-filters="sRGB">' +
-      '<feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="7" result="t"/>' +
+      '<feImage id="nycta-ink-noise" x="0" y="0" width="128" height="128" preserveAspectRatio="none" result="n"/>' +
+      '<feTile in="n" result="t"/>' +
       '<feDisplacementMap in="SourceGraphic" in2="t" scale="1" xChannelSelector="R" yChannelSelector="G"/></filter>';
     document.body.insertBefore(svg, document.body.firstChild);
     disp = svg.querySelector('feDisplacementMap');
-    turb = svg.querySelector('feTurbulence');
-    update();
+    img = svg.querySelector('feImage');
+    img.setAttribute('href', bakeNoise());
+    update(true);
   }
   // Browser zoom changes devicePixelRatio and fires resize; pinch zoom changes visualViewport.scale.
   var queued = false;
   function onZoom() {
     if (queued) return;
     queued = true;
-    requestAnimationFrame(function () { queued = false; if (document.documentElement.hasAttribute('data-print')) update(); });
+    requestAnimationFrame(function () { queued = false; if (document.documentElement.hasAttribute('data-print')) update(false); });
   }
   window.addEventListener('resize', onZoom);
   if (window.visualViewport) window.visualViewport.addEventListener('resize', onZoom);
@@ -170,6 +244,6 @@
       try { localStorage.setItem(KEY, on ? '1' : '0'); } catch (e) {}
     });
   }
-  window.NYCTAPrint = { init: init, update: update, set: set };
+  window.NYCTAPrint = { init: init, update: function () { update(true); }, set: set, noiseURI: bakeNoise };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire); else wire();
 })();
